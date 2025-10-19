@@ -3,859 +3,825 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>កម្មវិធីគ្រប់គ្រងទិន្នន័យ Google Sheet (ឆ្លាតវៃ)</title>
+    <title>ប្រព័ន្ធសម្គាល់ផ្ទៃមុខ</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Koulen&family=Moul&family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Koulen&display=swap" rel="stylesheet">
+
     <style>
         body {
-            font-family: 'Noto Sans Khmer', sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Fira Code', monospace;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            overflow-y: auto;
         }
-        .font-koulen {
+        .font-khmer {
             font-family: 'Koulen', cursive;
         }
-        /* Style for editable cells */
-        [contenteditable="true"] {
-            background-color: #fef9c3; /* yellow-100 */
-            transition: background-color 0.3s ease;
+        .hacker-glow {
+            text-shadow: 0 0 5px rgba(52, 211, 153, 0.7), 0 0 10px rgba(52, 211, 153, 0.5);
         }
-        [contenteditable="true"]:focus {
-            outline: 2px solid #3b82f6; /* blue-500 */
-            background-color: #ffffff;
+        .hacker-border {
+            border: 1px solid #34d399;
+            box-shadow: 0 0 10px #34d399, inset 0 0 10px #34d399;
+            transition: all 0.5s ease-in-out;
         }
-        /* Style for rows that have been edited */
-        .edited { 
-            background-color: #dbeafe !important; /* blue-100 */
+        input[type="file"]::file-selector-button {
+            background-color: #10b981;
+            color: #0d1117;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        tr {
-            transition: background-color 0.2s ease-in-out;
+        input[type="file"]::file-selector-button:hover {
+            background-color: #34d399;
+            box-shadow: 0 0 15px #34d399;
         }
-        /* Loader animation */
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-        .btn-spinner {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #ffffff;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Table header sorting styles */
-        .sortable-header { cursor: pointer; user-select: none; }
-        .sortable-header:hover { background-color: #e5e7eb; }
-        .sort-icon {
-            display: inline-block;
-            width: 1em;
-            height: 1em;
-            margin-left: 8px;
-            opacity: 0.4;
-            transition: opacity 0.2s, transform 0.2s;
-        }
-        .sortable-header.sorted .sort-icon { opacity: 1; }
-        .sort-icon.desc { transform: rotate(180deg); }
         
-        /* Modal animation */
-        #detail-modal .modal-content {
-            animation: slide-up 0.3s ease-out;
+        .target-panel {
+            transition: transform 0.7s ease-in-out, opacity 0.7s ease-in-out;
         }
-        @keyframes slide-up {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        .target-panel.shrunk {
+            transform: scale(0.9);
+            opacity: 0.7;
+        }
+        
+        .result-card {
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+            animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* Toast Notification styles */
-        #toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
-        .toast {
-            background-color: #fff;
-            color: #333;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+
+        .typing-effect::after {
+            content: '█';
+            animation: blink 0.7s infinite;
+            color: #34d399;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        
+        #mainGrid {
+            transition: grid-template-columns 0.7s ease-in-out;
+        }
+
+        @media (min-width: 768px) {
+            #mainGrid.results-visible {
+                grid-template-columns: 0.5fr 1.5fr;
+            }
+        }
+        
+        /* --- Scan Beam Animation --- */
+        .scan-beam {
+            position: absolute;
             opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.3s, transform 0.3s;
-            border-left: 5px solid;
+            transform-origin: left center;
+            animation: shoot-beam 0.7s ease-out forwards;
         }
-        .toast.show {
+        .scan-beam > div {
+            position: absolute;
+            height: 2px;
+            background: #34d399;
+            box-shadow: 0 0 8px 1px #34d399;
+        }
+        @keyframes shoot-beam {
+            0% { opacity: 1; transform: scaleX(0); }
+            40% { transform: scaleX(1); }
+            100% { opacity: 0; transform: scaleX(1); }
+        }
+
+        /* --- Tooltip for face selection --- */
+        #face-tooltip {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #34d399;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        /* --- Deep Scan Animation --- */
+        #deep-scan-overlay {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #deep-scan-overlay.active {
             opacity: 1;
-            transform: translateY(0);
         }
-        .toast.success { border-color: #28a745; }
-        .toast.error { border-color: #dc3545; }
+        .scan-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(52, 211, 153, 0.5) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(52, 211, 153, 0.5) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: scan-grid-animation 2s linear infinite;
+        }
+        .scan-grid-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #34d399;
+            box-shadow: 0 0 10px #34d399;
+            animation: deep-scan-line-animation 1.5s ease-out forwards;
+        }
+        @keyframes scan-grid-animation {
+            0% { background-position: 0 0; }
+            100% { background-position: -20px -20px; }
+        }
+        @keyframes deep-scan-line-animation {
+            0% { top: 0; opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        
+        /* AI Assistant Log */
+        #ai-assistant-log {
+            background-color: #00000080;
+            border: 1px solid #34d39960;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            height: 100px;
+            overflow-y: auto;
+        }
+        #ai-assistant-log p {
+            margin: 0;
+            line-height: 1.5;
+        }
+        #ai-assistant-log .log-entry {
+            color: #34d399;
+        }
+         #ai-assistant-log .log-entry.warn {
+            color: #facc15;
+        }
+
     </style>
 </head>
-<body class="text-gray-800">
-
-    <!-- Toast container for notifications -->
-    <div id="toast-container"></div>
-
-    <!-- Login Screen -->
-    <div id="login-screen" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-sm text-center">
-            <h2 class="text-2xl font-koulen text-blue-600 mb-2">សូមចូលប្រើប្រព័ន្ធ</h2>
-            <p class="text-gray-600 mb-6">ជ្រើសរើសគណនីរបស់អ្នកដើម្បីបន្ត</p>
-            
-            <div id="login-form">
-                <select id="user-select" class="w-full p-3 border border-gray-300 rounded-md mb-4 text-center">
-                    <option value="">-- ជ្រើសរើសឈ្មោះ --</option>
-                </select>
-                <button id="send-otp-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center justify-center gap-2">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/></svg>
-                    <span id="send-otp-text">ផ្ញើលេខកូដ (OTP)</span>
-                </button>
-            </div>
-
-            <div id="otp-form" class="hidden mt-4">
-                <p class="text-sm text-gray-500 mb-2">លេខកូដ OTP ត្រូវបានផ្ញើទៅកាន់ <b id="user-email-display"></b>។ សូមពិនិត្យប្រអប់សំបុត្រ។</p>
-                <input type="text" id="otp-input" placeholder="បញ្ចូលលេខកូដ OTP 6 ខ្ទង់" class="w-full p-3 border border-gray-300 rounded-md text-center tracking-[8px] text-lg font-koulen" maxlength="6">
-                <button id="verify-otp-btn" class="w-full mt-4 bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300">
-                    បញ្ជាក់ និងចូលប្រើ
-                </button>
-            </div>
-             <div id="login-status" class="mt-4 text-sm h-5" aria-live="polite"></div>
-        </div>
-    </div>
-
-    <!-- Main Content (Hidden by default) -->
-    <div id="main-content" class="container mx-auto p-4 md:p-6 hidden">
-        <header class="bg-white shadow-md rounded-lg p-4 mb-6 flex justify-between items-center">
-            <h1 class="text-2xl md:text-3xl font-koulen text-blue-600 text-center flex-grow">ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យបុគ្គលិក (ឆ្លាតវៃ)</h1>
-            <div class="flex items-center gap-2">
-                 <span id="logged-in-user" class="text-sm text-gray-600 hidden md:inline"></span>
-                 <button id="logout-btn" title="ចាកចេញពីប្រព័ន្ធ" aria-label="Log Out" class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition duration-300">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/></svg>
-                </button>
-            </div>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-5xl mx-auto relative">
+        <header class="text-center mb-6">
+            <h1 class="text-2xl md:text-4xl font-bold text-emerald-400 hacker-glow font-khmer">ប្រព័ន្ធសម្គាល់ផ្ទៃមុខ</h1>
+            <p class="text-sm text-gray-400 mt-2">បញ្ចូលរូបភាពដើម្បីកំណត់អត្តសញ្ញាណបុគ្គលពីក្នុងមូលដ្ឋានទិន្នន័យ។</p>
         </header>
 
-        <main class="bg-white shadow-md rounded-lg p-4">
-            <!-- Action Buttons -->
-            <div class="mb-4">
-                 <button id="incompleteDataBtn" class="w-full bg-orange-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-600 transition duration-300 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-exclamation" viewBox="0 0 16 16"><path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.256 7a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10c.26 0 .507.009.74.025.226-.341.496-.65.804-.918C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4s1 1 1 1z"/><path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-3.5-2a.5.5 0 0 0-.5.5v1.5a.5.5 0 0 0 1 0V11a.5.5 0 0 0-.5-.5m0 4a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/></svg>
-                     <span>បង្ហាញទិន្នន័យមិនពេញលេញ (ទាំងអស់)</span>
-                </button>
-            </div>
-            
-            <!-- Summary and Filters -->
-            <div class="mb-4 space-y-4">
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-center">
-                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-                        <h3 class="text-sm font-bold text-blue-800">បុគ្គលិកសរុប</h3>
-                        <p id="total-employees" class="text-2xl font-koulen text-blue-600">0</p>
+        <main id="mainGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="targetPanel" class="bg-gray-900/50 p-4 rounded-lg hacker-border relative overflow-hidden target-panel">
+                <h2 class="text-lg font-semibold text-emerald-400 mb-4 border-b border-emerald-500/30 pb-2 font-khmer">រូបភាពគោលដៅ</h2>
+                <div id="imageContainer" class="relative min-h-[250px] flex items-center justify-center bg-black rounded-md">
+                    <canvas id="canvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                    <div id="uploadPrompt" class="text-center text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <p class="mt-2">រង់ចាំរូបភាព...</p>
                     </div>
-                    <div class="bg-pink-50 border border-pink-200 p-3 rounded-lg">
-                        <h3 class="text-sm font-bold text-pink-800">បុគ្គលិកស្ត្រី</h3>
-                        <p id="female-employees" class="text-2xl font-koulen text-pink-600">0</p>
-                    </div>
-                     <div class="bg-green-50 border border-green-200 p-3 rounded-lg col-span-2 md:col-span-1">
-                        <h3 class="text-sm font-bold text-green-800">បុគ្គលិកបុរស</h3>
-                        <p id="male-employees" class="text-2xl font-koulen text-green-600">0</p>
-                    </div>
+                    <img id="image" class="hidden max-w-full max-h-[400px] rounded-md" />
+                    <div id="deep-scan-overlay"><div class="scan-grid"></div><div class="scan-grid-line"></div></div>
                 </div>
-
-                <div class="flex flex-wrap items-end gap-4 p-3 bg-gray-50 rounded-lg border">
-                    <div id="dateFilterWrapper" class="flex-grow min-w-[180px]">
-                        <label for="dateFilter" class="block text-sm font-medium text-gray-700 mb-1">ជ្រើសរើសកាលបរិច្ឆេទ:</label>
-                        <input type="date" id="dateFilter" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                     <div class="flex-grow min-w-[200px]">
-                        <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">ស្វែងរកទិន្នន័យ:</label>
-                        <input type="text" id="searchInput" placeholder="វាយបញ្ចូលឈ្មោះ, ថ្នាក់, អត្តលេខ..." class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
-                    </div>
-                    <div>
-                        <button id="updateDataBtn" class="w-full bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition duration-300 flex items-center justify-center gap-2" disabled>
-                             <div id="save-spinner" class="btn-spinner hidden"></div>
-                             <svg id="save-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save" viewBox="0 0 16 16"><path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v4.5h2a.5.5 0 0 1 .354.854l-2.5 2.5a.5.5 0 0 1-.708 0l-2.5-2.5A.5.5 0 0 1 5.5 6.5h2V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/></svg>
-                             <span id="save-text">រក្សាទុក</span>
-                        </button>
-                    </div>
+                <div class="mt-4">
+                    <input type="file" id="fileInput" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold">
                 </div>
             </div>
 
-            <div id="status" class="text-center my-4" aria-live="polite"></div>
-            <div id="loader" class="hidden flex justify-center items-center my-8"><div class="loader"></div></div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white border border-gray-200">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider sortable-header" data-col-index="0">#</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider sortable-header" data-col-index="1">ក្រុម</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider sortable-header" data-col-index="2">ថ្នាក់</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider sortable-header" data-col-index="3">ផ្នែកការងារ</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider sortable-header" data-col-index="4">ឈ្មោះ</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider sortable-header" data-col-index="5">ភេទ</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider sortable-header" data-col-index="6">អត្តលេខ</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider sortable-header" data-col-index="7">កាលបរិច្ឆេទ</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider sortable-header" data-col-index="8">កាលវិភាគ</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider bg-yellow-200">ម៉ោងចូល</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider bg-yellow-200">ម៉ោងចេញ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dataTableBody" class="divide-y divide-gray-200"></tbody>
-                </table>
+            <div class="bg-gray-900/50 p-4 rounded-lg hacker-border flex flex-col">
+                <h2 class="text-lg font-semibold text-emerald-400 mb-4 border-b border-emerald-500/30 pb-2 font-khmer">AI វិភាគ & លទ្ធផល</h2>
+                 <!-- NEW AI Assistant Log -->
+                <div id="ai-assistant-log">
+                    <p class="text-gray-500">AI Assistant: រង់ចាំបញ្ជា...</p>
+                </div>
+                <div id="results" class="flex-grow space-y-4 max-h-[340px] overflow-y-auto pr-2">
+                     <p class="text-gray-500">លទ្ធផលនឹងបង្ហាញនៅទីនេះ។</p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-emerald-500/30">
+                    <button id="newScanButton" class="hidden w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded transition-all duration-300 hacker-glow font-khmer">
+                        ចាប់ផ្តើមវិភាគសាជាថ្មី
+                    </button>
+                </div>
             </div>
         </main>
+        <div id="animation-container" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10"></div>
+        <div id="face-tooltip">ចុចដើម្បីវិភាគ</div>
     </div>
 
-    <!-- Employee Detail Modal -->
-    <div id="detail-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-40">
-        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div class="p-5 border-b flex justify-between items-center bg-gray-50">
-                <h3 class="text-xl font-koulen text-blue-700">ព័ត៌មានលម្អិតបុគ្គលិក</h3>
-                <button id="close-modal-btn" aria-label="Close modal" class="text-gray-400 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="p-6 md:flex md:gap-6">
-                <div class="md:w-1/3 mb-4 md:mb-0">
-                    <div id="photo-container" class="w-32 h-32 mx-auto rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-md">
-                        <img id="employee-photo" src="https://placehold.co/128x128/EBF4FF/7F9CF5?text=Loading..." alt="Employee Photo" class="w-full h-full object-cover">
-                    </div>
-                </div>
-                <div class="md:w-2/3 space-y-2 text-gray-700">
-                    <h4 id="modal-name" class="text-2xl font-bold text-gray-800"></h4>
-                    <p><strong class="font-semibold w-24 inline-block">អត្តលេខ:</strong> <span id="modal-id"></span></p>
-                    <p><strong class="font-semibold w-24 inline-block">ផ្នែក:</strong> <span id="modal-department"></span></p>
-                    <p><strong class="font-semibold w-24 inline-block">ភេទ:</strong> <span id="modal-gender"></span></p>
-                    <p><strong class="font-semibold w-24 inline-block">ថ្នាក់:</strong> <span id="modal-class"></span></p>
-                    <p><strong class="font-semibold w-24 inline-block">ក្រុម:</strong> <span id="modal-group"></span></p>
-                </div>
-            </div>
-             <div class="p-6 bg-gray-50 border-t grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div>
-                    <p class="text-sm text-gray-500">កាលបរិច្ឆេទ</p>
-                    <p id="modal-date" class="font-semibold"></p>
-                </div>
-                 <div>
-                    <p class="text-sm text-gray-500">ម៉ោងចូល</p>
-                    <p id="modal-checkin" class="font-semibold text-green-600"></p>
-                </div>
-                 <div>
-                    <p class="text-sm text-gray-500">ម៉ោងចេញ</p>
-                    <p id="modal-checkout" class="font-semibold text-red-600"></p>
-                </div>
-            </div>
+    <div id="loading" class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50 transition-opacity duration-500">
+        <div class="loader animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500"></div>
+        <p id="loadingText" class="text-emerald-400 mt-4 text-lg hacker-glow">កំពុងរៀបចំប្រព័ន្ធ...</p>
+        <div class="w-64 mt-2 bg-gray-700 rounded-full h-2.5">
+            <div id="progressBar" class="bg-emerald-500 h-2.5 rounded-full" style="width: 0%"></div>
         </div>
+        <p id="progressText" class="text-gray-400 text-sm mt-1"></p>
     </div>
-
 
     <script>
-        // ===================================================================================
-        // !!! សំខាន់ !!! សូមដាក់ URL របស់ Google Apps Script Web App របស់អ្នកនៅទីនេះ
-        // ===================================================================================
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzOdGJKkq_Wq5pUBr3242Jea6I8iM6ZrjM0ZeVoukw_cx9pf-Zxm7wM1WFQizc-HeWE/exec'; // <--- បញ្ចូល Web App URL របស់អ្នកនៅទីនេះ
+        const fileInput = document.getElementById('fileInput');
+        const imageContainer = document.getElementById('imageContainer');
+        const imgElement = document.getElementById('image');
+        const canvas = document.getElementById('canvas');
+        const resultsDiv = document.getElementById('results');
+        const uploadPrompt = document.getElementById('uploadPrompt');
+        const loadingDiv = document.getElementById('loading');
+        const loadingText = document.getElementById('loadingText');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const targetPanel = document.getElementById('targetPanel');
+        const mainGrid = document.getElementById('mainGrid');
+        const newScanButton = document.getElementById('newScanButton');
+        const faceTooltip = document.getElementById('face-tooltip');
+        const deepScanOverlay = document.getElementById('deep-scan-overlay');
+        const aiLog = document.getElementById('ai-assistant-log');
+        
+        // IMPORTANT: Replace 'YOUR_API_KEY' with your actual Google Cloud API Key
+        const GOOGLE_API_KEY = 'AIzaSyBValEJuosFLeyoIELmb_XcXJoxUzSm3-c'; 
+        const SHEET_ID = '1eRyPoifzyvB4oBmruNyXcoKMKPRqjk6xDD6-bPNW6pc';
+        const RANGES = ['DIList!E9:E', 'DIList!L9:L', 'DIList!M9:M', 'DIList!N9:N', 'DIList!AA9:AA'];
 
-        // --- ការកំណត់អ្នកប្រើប្រាស់ ---
-        const USERS = {
-            'darotrb0@gmail.com': 'MMK',
-            'bonchantha43@gmail.com': 'ប៊ន ចន្ថា',
-            'chhanonlork87@gmail.com': 'ឡោក ឆាណុន',
-            'roeunsreyneth2026@gmail.com': 'រឿន ស្រណែត',
-            'phonekh501@gmail.com': 'សយ គឹមសុដានី',
-            'thavry525354@gmail.com': 'ប៉ី ថាវរី',
-            'chanthaihin168@gmail.com': 'ហឹន ចាន់ថៃ'
-        };
+        let labeledFaceDescriptors;
+        let audioCtx;
+        let interactiveDetections = [];
+        let hoveredFaceIndex = -1;
 
-        // --- DOM ELEMENT CACHING ---
-        const getEl = (id) => document.getElementById(id);
-        const DOM = {
-            loginScreen: getEl('login-screen'),
-            mainContent: getEl('main-content'),
-            loginForm: getEl('login-form'),
-            otpForm: getEl('otp-form'),
-            userSelect: getEl('user-select'),
-            sendOtpBtn: getEl('send-otp-btn'),
-            sendOtpText: getEl('send-otp-text'),
-            verifyOtpBtn: getEl('verify-otp-btn'),
-            otpInput: getEl('otp-input'),
-            userEmailDisplay: getEl('user-email-display'),
-            loginStatus: getEl('login-status'),
-            logoutBtn: getEl('logout-btn'),
-            loggedInUserSpan: getEl('logged-in-user'),
-            dateFilter: getEl('dateFilter'),
-            dateFilterWrapper: getEl('dateFilterWrapper'),
-            updateDataBtn: getEl('updateDataBtn'),
-            dataTableBody: getEl('dataTableBody'),
-            loader: getEl('loader'),
-            statusDiv: getEl('status'),
-            saveText: getEl('save-text'),
-            saveSpinner: getEl('save-spinner'),
-            saveIcon: getEl('save-icon'),
-            searchInput: getEl('searchInput'),
-            incompleteDataBtn: getEl('incompleteDataBtn'),
-            detailModal: getEl('detail-modal'),
-            closeModalBtn: getEl('close-modal-btn'),
-            employeePhoto: getEl('employee-photo'),
-        };
-        
-        // --- APPLICATION STATE ---
-        const state = {
-            allData: [],
-            filteredData: [],
-            sortConfig: { index: null, direction: 'asc' },
-            currentMode: 'date', // 'date' or 'incomplete'
-            otpCooldown: 0,
-            currentUser: null,
-        };
-        
-        // --- UTILITY & HELPER FUNCTIONS ---
-        
-        /**
-         * Shows a toast notification.
-         * @param {string} message - The message to display.
-         * @param {string} type - 'success' or 'error'.
-         */
-        function showToast(message, type = 'success') {
-            const toastContainer = getEl('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            toastContainer.appendChild(toast);
-
-            // Trigger reflow to enable animation
-            setTimeout(() => toast.classList.add('show'), 10);
-
-            // Remove the toast after 4 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => toast.remove());
-            }, 4000);
-        }
-
-        const showLoader = () => { DOM.loader.classList.remove('hidden'); DOM.statusDiv.textContent = ''; DOM.dataTableBody.innerHTML = ''; }
-        const hideLoader = () => DOM.loader.classList.add('hidden');
-        
-        function showStatus(message, isError = false) {
-            DOM.statusDiv.textContent = message;
-            DOM.statusDiv.className = isError ? 'text-center my-4 text-red-600 font-bold' : 'text-center my-4 text-green-600 font-semibold';
-        }
-        
-        function showLoginStatus(message, isError = false) {
-            DOM.loginStatus.textContent = message;
-            DOM.loginStatus.className = isError ? 'mt-4 text-sm h-5 text-red-600' : 'mt-4 text-sm h-5 text-green-600';
-        }
-        
-        function validateWebAppUrl() {
-            if (!WEB_APP_URL || WEB_APP_URL.length < 50) {
-                 showStatus('!!! សូមបញ្ជាក់៖ អ្នកត្រូវដាក់ Web App URL ដែលបាន Deploy ពី Google Apps Script របស់អ្នក នៅក្នុងកូដ JavaScript ជាមុនសិន ទើបកម្មវិធីនេះអាចដំណើរការបាន។', true);
-                 return false;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-            return true;
         }
 
-        function formatDateForDisplay(dateStr) {
-            if (!dateStr) return '';
-            const date = new Date(dateStr);
-            if (isNaN(date.getTime()) || date.getFullYear() < 1971) return ''; 
-            const options = { day: '2-digit', month: 'short', year: 'numeric' };
-            return date.toLocaleDateString('en-GB', options).replace(/ /g, '-');
-        }
+        function logToAIAssistant(message, type = 'log') {
+            const newLog = document.createElement('p');
+            const prefix = document.createElement('span');
+            prefix.textContent = `> `;
+            const text = document.createElement('span');
+            
+            newLog.appendChild(prefix);
+            newLog.appendChild(text);
 
-        function formatTimeForDisplay(dateStr) {
-            if (!dateStr) return '';
-            const date = new Date(dateStr);
-            if (isNaN(date.getTime())) return '';
-            // Format time as HH:mm:ss in 24-hour format
-            const options = {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            };
-            return date.toLocaleTimeString('en-GB', options);
-        }
-        
-        function formatDateForAPI(date) {
-            const d = new Date(date);
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-        
-        // --- DATA HANDLING & RENDERING ---
-
-        async function apiCall(action, params = {}) {
-            const url = new URL(WEB_APP_URL);
-            url.searchParams.append('action', action);
-            for (const key in params) {
-                url.searchParams.append(key, params[key]);
+            if (type === 'warn') {
+                 newLog.className = 'log-entry warn';
+            } else {
+                 newLog.className = 'log-entry';
             }
 
+            aiLog.innerHTML = ''; // Clear previous logs
+            aiLog.appendChild(newLog);
+            typeWriter(text, message, 20);
+        }
+        
+        function playSound(type, ...args) {
+            if (!audioCtx) return;
+            if (type === 'dataTransfer') {
+                const noise = audioCtx.createBufferSource();
+                const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.5, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < data.length; i++) { data[i] = Math.random() * 2 - 1; }
+                noise.buffer = buffer;
+                
+                const bandpass = audioCtx.createBiquadFilter();
+                bandpass.type = 'bandpass';
+                bandpass.frequency.value = 1000;
+                bandpass.Q.value = 20;
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+
+                bandpass.frequency.setValueAtTime(500, audioCtx.currentTime);
+                bandpass.frequency.exponentialRampToValueAtTime(3000, audioCtx.currentTime + 0.4);
+
+                noise.connect(bandpass).connect(gain).connect(audioCtx.destination);
+                noise.start();
+                noise.stop(audioCtx.currentTime + 0.5);
+
+            } else if (type === 'deepScan') {
+                const oscillator = audioCtx.createOscillator();
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 1.4);
+
+                const gainNode = audioCtx.createGain();
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.4);
+                
+                oscillator.connect(gainNode).connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 1.5);
+            }
+             else {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                 if (type === 'beep') {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+                } else if (type === 'scan') {
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                    gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+                }
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            }
+        }
+
+        function typeWriter(element, text, speed = 25) {
+            let i = 0;
+            element.innerHTML = '';
+            element.classList.add('typing-effect');
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    element.classList.remove('typing-effect');
+                }
+            }
+            type();
+        }
+
+        async function loadModels() {
+            loadingText.textContent = 'កំពុងទាញយកម៉ូឌែល AI...';
+            progressBar.style.width = '10%';
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+            await Promise.all([
+                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+                faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
+            ]);
+        }
+        
+        async function fetchDataFromGoogleSheet() {
+            loadingText.textContent = 'កំពុងភ្ជាប់ទៅមូលដ្ឋានទិន្នន័យ...';
+            progressBar.style.width = '20%';
+            
+            if (GOOGLE_API_KEY === 'YOUR_API_KEY' || !GOOGLE_API_KEY) {
+                const errorMsg = 'Error: GOOGLE API KEY មិន​ត្រូវ​បាន​កំណត់​ค่า​ទេ។ សូម​ដាក់​ API Key របស់​អ្នក​នៅ​ក្នុង​កូដ។';
+                loadingText.textContent = errorMsg;
+                setTimeout(() => {
+                    loadingDiv.style.opacity = '0';
+                    loadingDiv.style.pointerEvents = 'none';
+                    logToAIAssistant(errorMsg, 'warn');
+                }, 1500);
+                return [];
+            }
+            
+            const rangesQuery = RANGES.map(r => `ranges=${encodeURIComponent(r)}`).join('&');
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values:batchGet?${rangesQuery}&key=${GOOGLE_API_KEY}`;
             try {
                 const response = await fetch(url);
-                if (!response.ok) throw new Error(`Network error: ${response.statusText}`);
+                if (!response.ok) throw new Error(`Google Sheets API Error: ${response.statusText} (Status: ${response.status})`);
                 const data = await response.json();
-                if (data.error) throw new Error(data.error);
-                return data;
-            } catch (error) {
-                console.error(`API Call Error (${action}):`, error);
-                throw error; // Re-throw for specific handlers
-            }
-        }
-
-        async function fetchData() {
-            if (!validateWebAppUrl() || state.currentMode !== 'date') return;
-            showLoader();
-            DOM.updateDataBtn.disabled = true;
-
-            const selectedDate = DOM.dateFilter.value;
-            if (!selectedDate) {
-                hideLoader();
-                showStatus('សូមជ្រើសរើសកាលបរិច្ឆេទ។', true);
-                return;
-            }
-            
-            try {
-                const data = await apiCall('getData', { date: selectedDate });
-                state.allData = data;
-                applyFiltersAndRender();
-                if (data.length === 0) {
-                    showStatus(`រកមិនឃើញទិន្នន័យសម្រាប់ថ្ងៃទី ${formatDateForDisplay(selectedDate)} ទេ។`);
-                } else {
-                     showStatus(`រកឃើញ ${data.length} ទិន្នន័យសម្រាប់ថ្ងៃទី ${formatDateForDisplay(selectedDate)}`);
+                loadingText.textContent = 'កំពុងដំណើរការទិន្នន័យ...';
+                progressBar.style.width = '30%';
+                const [ids, namesKm, names, genders, imageUrls] = data.valueRanges.map(range => range.values || []);
+                const maxRows = Math.max(...(data.valueRanges.map(range => range.values ? range.values.length : 0)));
+                const database = [];
+                for (let i = 0; i < maxRows; i++) {
+                    if (ids[i]?.[0] && imageUrls[i]?.[0]) {
+                        database.push({
+                            id: ids[i]?.[0] || '', nameKm: namesKm[i]?.[0] || '', name: names[i]?.[0] || 'N/A',
+                            gender: genders[i]?.[0] || '', imageUrl: imageUrls[i]?.[0]
+                        });
+                    }
                 }
+                return database;
             } catch (error) {
-                showStatus(`មានបញ្ហាក្នុងការទាញទិន្នន័យ: ${error.message}`, true);
-            } finally {
-                hideLoader();
+                console.error("Failed to fetch data from Google Sheet:", error);
+                const errorMsg = 'Error: មិនអាចភ្ជាប់ទៅមូលដ្ឋានទិន្នន័យបានទេ។';
+                loadingText.textContent = errorMsg;
+                setTimeout(() => {
+                    loadingDiv.style.opacity = '0';
+                    loadingDiv.style.pointerEvents = 'none';
+                    logToAIAssistant(`${errorMsg} សូមពិនិត្យ API Key, Sheet ID, និងការអនុញ្ញាត (Permissions) របស់ Sheet។`, 'warn');
+                }, 1500);
+                return [];
             }
         }
 
-        async function fetchIncompleteData() {
-            if (!validateWebAppUrl()) return;
-            showLoader();
-            DOM.updateDataBtn.disabled = true;
-
-            try {
-                const data = await apiCall('getIncompleteData');
-                data.sort((a, b) => (new Date(b.data[7])) - (new Date(a.data[7]))); // Sort by date desc
-                state.allData = data;
-                applyFiltersAndRender();
-                if (data.length === 0) {
-                    showStatus('រកមិនឃើញទិន្នន័យមិនពេញលេញណាមួយទេ។');
-                } else {
-                    showStatus(`រកឃើញ ${data.length} ទិន្នន័យមិនពេញលេញ`, false);
+        async function buildFaceDatabase() {
+            const database = await fetchDataFromGoogleSheet();
+            if (database.length === 0) {
+                if (!loadingText.textContent.startsWith('Error')) loadingText.textContent = 'Error: មូលដ្ឋានទិន្នន័យទទេ ឬមិនត្រឹមត្រូវ។';
+                return [];
+            }
+            loadingText.textContent = 'កំពុងបង្កើតសន្ទស្សន៍មុខ...';
+            let processedCount = 0;
+            const totalCount = database.length;
+            const descriptors = await Promise.all(database.map(async (person) => {
+                try {
+                    const imageUrl = `https://corsproxy.io/?${encodeURIComponent(person.imageUrl)}`;
+                    const img = await faceapi.fetchImage(imageUrl);
+                    const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                    processedCount++;
+                    const progress = 30 + (processedCount / totalCount) * 60;
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `(${processedCount}/${totalCount}) Analyzing ${person.name}`;
+                    if (detection) return new faceapi.LabeledFaceDescriptors(JSON.stringify(person), [detection.descriptor]);
+                    return null;
+                } catch (error) {
+                    console.error(`Could not process image for ${person.name}:`, error);
+                    processedCount++;
+                    const progress = 30 + (processedCount / totalCount) * 60;
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `(${processedCount}/${totalCount}) ${person.name} (Image Error)`;
+                    return null;
                 }
-            } catch (error) {
-                showStatus(`មានបញ្ហាក្នុងការទាញទិន្នន័យមិនពេញលេញ: ${error.message}`, true);
-            } finally {
-                hideLoader();
-            }
+            }));
+            return descriptors.filter(d => d !== null);
         }
 
-        function applyFiltersAndRender() {
-            const searchTerm = DOM.searchInput.value.toLowerCase();
-            state.filteredData = state.allData.filter(item => 
-                 searchTerm ? item.data.some(cell => cell && cell.toString().toLowerCase().includes(searchTerm)) : true
-            );
-            
-            applySorting();
-            renderTable(state.filteredData);
-            updateSummary(state.filteredData);
+        async function initialize() {
+            await loadModels();
+            labeledFaceDescriptors = await buildFaceDatabase();
+            if (!labeledFaceDescriptors || labeledFaceDescriptors.length === 0) {
+                 if (!loadingText.textContent.startsWith('Error')) loadingText.textContent = 'Error: មិនអាចបង្កើតមូលដ្ឋានទិន្នន័យផ្ទៃមុខបានទេ។';
+                 return;
+            }
+            progressBar.style.width = '100%';
+            loadingText.textContent = 'ប្រព័ន្ធរួចរាល់។';
+            setTimeout(() => {
+                loadingDiv.style.opacity = '0';
+                loadingDiv.style.pointerEvents = 'none';
+            }, 1000);
         }
         
-        function applySorting() {
-            if (state.sortConfig.index === null) return;
-            
-            state.filteredData.sort((a, b) => {
-                const valA = a.data[state.sortConfig.index] || '';
-                const valB = b.data[state.sortConfig.index] || '';
-                
-                if (state.sortConfig.index === 7) { // Date column
-                    const dateA = new Date(valA).getTime() || 0;
-                    const dateB = new Date(valB).getTime() || 0;
-                    return state.sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
-                }
-
-                const comparison = valA.toString().localeCompare(valB.toString(), 'km-KH', { numeric: true });
-                return state.sortConfig.direction === 'asc' ? comparison : -comparison;
-            });
-            updateSortIcons();
+        newScanButton.addEventListener('click', () => {
+            fileInput.value = '';
+            fileInput.click()
+        });
+        
+        function cleanupInteractiveListeners() {
+            canvas.removeEventListener('mousemove', handleCanvasMouseMove);
+            canvas.removeEventListener('click', handleCanvasClick);
+            canvas.removeEventListener('mouseout', handleCanvasMouseOut);
+            canvas.style.cursor = 'default';
+            faceTooltip.style.opacity = '0';
+            interactiveDetections = [];
+            hoveredFaceIndex = -1;
         }
 
-        function renderTable(data) {
-            DOM.dataTableBody.innerHTML = '';
-            if (data.length === 0) {
-                 DOM.dataTableBody.innerHTML = `<tr><td colspan="11" class="text-center py-8 text-gray-500">រកមិនឃើញទិន្នន័យទេ។</td></tr>`;
+        async function enhanceImage(imageEl, box) {
+            const tempCanvas = document.createElement('canvas');
+            const scale = imageEl.naturalWidth / imageEl.width;
+            const sx = box.x * scale;
+            const sy = box.y * scale;
+            const sw = box.width * scale;
+            const sh = box.height * scale;
+            tempCanvas.width = sw;
+            tempCanvas.height = sh;
+            const ctx = tempCanvas.getContext('2d');
+            ctx.filter = 'contrast(1.3) brightness(1.1) saturate(1.2) sharpen(0.5)';
+            ctx.drawImage(imageEl, sx, sy, sw, sh, 0, 0, sw, sh);
+            return tempCanvas;
+        }
+
+        fileInput.addEventListener('change', async () => {
+            initAudio();
+            if (fileInput.files.length === 0) return;
+            if (!labeledFaceDescriptors || labeledFaceDescriptors.length === 0) {
+                logToAIAssistant('មូលដ្ឋានទិន្នន័យមិនទាន់រួចរាល់ទេ។ សូមពិនិត្យ API Key។', 'warn');
+                return;
+            }
+
+            cleanupInteractiveListeners();
+            newScanButton.classList.add('hidden');
+            targetPanel.classList.remove('shrunk');
+            mainGrid.classList.remove('results-visible');
+            resultsDiv.innerHTML = '<p class="text-gray-500">លទ្ធផលនឹងបង្ហាញនៅទីនេះ។</p>';
+            aiLog.innerHTML = '<p class="text-gray-500">AI Assistant: រង់ចាំបញ្ជា...</p>';
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const file = fileInput.files[0];
+            const imageUrl = URL.createObjectURL(file);
+            uploadPrompt.classList.add('hidden');
+            imgElement.src = imageUrl;
+            imgElement.classList.remove('hidden');
+            
+            imgElement.onload = async () => {
+                const displaySize = { width: imgElement.width, height: imgElement.height };
+                faceapi.matchDimensions(canvas, displaySize);
+                logToAIAssistant('កំពុងស្វែងរកផ្ទៃមុខក្នុងរូបភាព...');
+                const detections = await faceapi.detectAllFaces(imgElement, new faceapi.SsdMobilenetv1Options()).withFaceLandmarks().withFaceDescriptors().withAgeAndGender();
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+
+                if (resizedDetections.length === 0) {
+                    logToAIAssistant('រកមិនឃើញផ្ទៃមុខទេ។ សូមព្យាយាមម្តងទៀត។', 'warn');
+                } else if (resizedDetections.length === 1) {
+                    await analyzeSelectedFace(resizedDetections[0]);
+                } else {
+                    enableInteractiveFaceSelection(resizedDetections);
+                }
+                newScanButton.classList.remove('hidden');
+            };
+        });
+
+        const handleCanvasMouseMove = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            let foundFace = false;
+            let newHoveredIndex = -1;
+
+            interactiveDetections.forEach((detection, index) => {
+                const box = detection.detection.box;
+                if (x > box.x && x < box.x + box.width && y > box.y && y < box.y + box.height) {
+                    foundFace = true;
+                    newHoveredIndex = index;
+                }
+            });
+
+            if (hoveredFaceIndex !== newHoveredIndex) {
+                hoveredFaceIndex = newHoveredIndex;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                interactiveDetections.forEach((detection, index) => {
+                    const boxColor = index === hoveredFaceIndex ? '#34d399' : '#ffffff';
+                    new faceapi.draw.DrawBox(detection.detection.box, { boxColor, lineWidth: 2, label: `មុខ #${index+1}`}).draw(canvas);
+                });
+            }
+
+            if (foundFace) {
+                canvas.style.cursor = 'pointer';
+                faceTooltip.style.opacity = '1';
+                faceTooltip.style.left = `${e.clientX + 15}px`;
+                faceTooltip.style.top = `${e.clientY}px`;
+            } else {
+                canvas.style.cursor = 'default';
+                faceTooltip.style.opacity = '0';
+            }
+        };
+
+        const handleCanvasMouseOut = () => { faceTooltip.style.opacity = '0'; };
+        const handleCanvasClick = (e) => { if (hoveredFaceIndex !== -1) { analyzeSelectedFace(interactiveDetections[hoveredFaceIndex]); }};
+
+        function enableInteractiveFaceSelection(detections) {
+            logToAIAssistant(`រកឃើញ ${detections.length} ផ្ទៃមុខ។ សូមចុចលើផ្ទៃមុខណាមួយដើម្បីវិភាគ។`);
+            resultsDiv.innerHTML = '';
+            interactiveDetections = detections;
+            hoveredFaceIndex = -1;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            detections.forEach((detection, index) => {
+                new faceapi.draw.DrawBox(detection.detection.box, { boxColor: '#ffffff', lineWidth: 2, label: `មុខ #${index+1}`}).draw(canvas);
+            });
+
+            canvas.addEventListener('mousemove', handleCanvasMouseMove);
+            canvas.addEventListener('click', handleCanvasClick);
+            canvas.addEventListener('mouseout', handleCanvasMouseOut);
+        }
+        
+        function triggerScanAnimation() {
+            playSound('dataTransfer');
+            const container = document.getElementById('animation-container');
+            const startEl = document.getElementById('targetPanel');
+            const endEl = document.getElementById('results');
+
+            if (!startEl || !endEl || !container) return;
+
+            const startRect = startEl.getBoundingClientRect();
+            const endRect = endEl.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+
+            const startX = startRect.right - containerRect.left;
+            const startY = startRect.top + startRect.height / 2 - containerRect.top;
+            const endX = endRect.left - containerRect.left;
+
+            const beam = document.createElement('div');
+            beam.className = 'scan-beam';
+            const beamWidth = endX - startX;
+
+            for(let i=0; i<3; i++) {
+                const line = document.createElement('div');
+                line.style.width = '100%';
+                line.style.animationDelay = `${i * 0.05}s`;
+                line.style.opacity = `${1 - i * 0.2}`;
+                line.style.top = `${i * 4 - 4}px`;
+                beam.appendChild(line);
+            }
+
+            beam.style.top = `${startY}px`;
+            beam.style.left = `${startX}px`;
+            beam.style.width = `${beamWidth}px`;
+            container.appendChild(beam);
+            setTimeout(() => beam.remove(), 700);
+        }
+
+        async function analyzeSelectedFace(detection) {
+            cleanupInteractiveListeners();
+            resultsDiv.innerHTML = '';
+            
+            let analysisMode = 'Fast Scan';
+            let finalDescriptor;
+
+            const { landmarks } = detection;
+            const jawline = landmarks.getJawOutline();
+            const faceWidth = jawline[16].x - jawline[0].x;
+            const noseTip = landmarks.getNose()[3];
+            const isProfile = Math.abs(noseTip.x - (jawline[0].x + faceWidth/2)) > faceWidth * 0.2;
+
+            if (isProfile) {
+                analysisMode = 'Profile Reconstruction';
+                logToAIAssistant('រកឃើញផ្ទៃមុខបែរចំហៀង។ កំពុងព្យាយាមបង្កើតទម្រង់មុខឡើងវិញ...', 'warn');
+                finalDescriptor = detection.descriptor;
+            } else {
+                analysisMode = 'Deep Scan';
+                logToAIAssistant('គុណភាពរូបភាពល្អ។ កំពុងដំណើរការ Deep Scan...');
+                const enhancedFaceCanvas = await enhanceImage(imgElement, detection.detection.box);
+                const deepScanDetection = await faceapi.detectSingleFace(enhancedFaceCanvas).withFaceLandmarks().withFaceDescriptor();
+                if (deepScanDetection) {
+                    finalDescriptor = deepScanDetection.descriptor;
+                } else {
+                    logToAIAssistant('Deep Scan បរាជ័យ, ត្រឡប់មកប្រើ Standard Scan', 'warn');
+                    analysisMode = 'Fast Scan';
+                    finalDescriptor = detection.descriptor;
+                }
+            }
+
+            if (!finalDescriptor) {
+                 logToAIAssistant('ការវិភាគបរាជ័យ: មិនអាចបង្កើត Biometric Profile បានទេ។', 'warn');
                  return;
             }
 
-            const fragment = document.createDocumentFragment();
-            if (state.currentMode === 'incomplete') {
-                const groupedData = data.reduce((acc, item) => {
-                    const date = formatDateForDisplay(item.data[7]) || 'មិនមានកាលបរិច្ឆេទ';
-                    if (!acc[date]) acc[date] = [];
-                    acc[date].push(item);
-                    return acc;
-                }, {});
-
-                for (const date in groupedData) {
-                    const itemsForDate = groupedData[date];
-                    const groupRow = document.createElement('tr');
-                    groupRow.className = 'bg-blue-200 font-bold sticky top-0'; // Sticky header for date group
-                    groupRow.innerHTML = `<td colspan="11" class="px-4 py-2 text-gray-800">កាលបរិច្ឆេទ: ${date} (សរុប: ${itemsForDate.length})</td>`;
-                    fragment.appendChild(groupRow);
-                    itemsForDate.forEach(item => fragment.appendChild(createRowElement(item)));
-                }
+            targetPanel.classList.add('shrunk');
+            mainGrid.classList.add('results-visible');
+            triggerScanAnimation();
+            
+            const { box } = detection.detection;
+            if (analysisMode !== 'Fast Scan' && !isProfile) {
+                deepScanOverlay.style.left = `${box.left}px`;
+                deepScanOverlay.style.top = `${box.top}px`;
+                deepScanOverlay.style.width = `${box.width}px`;
+                deepScanOverlay.style.height = `${box.height}px`;
+                deepScanOverlay.classList.add('active');
+                playSound('deepScan');
+                await new Promise(res => setTimeout(res, 1500));
+                deepScanOverlay.classList.remove('active');
             } else {
-                data.forEach(item => fragment.appendChild(createRowElement(item)));
+                 await new Promise(res => setTimeout(res, 500));
             }
-            DOM.dataTableBody.appendChild(fragment);
-        }
-        
-        function createRowElement(item) {
-            const isITSupport = (item.data[3] || '').trim().toLowerCase() === 'it support';
-            const isAdmin = state.currentUser && state.currentUser.email === 'darotrb0@gmail.com';
-
-            const canEditThisRow = !isITSupport || isAdmin;
-
-            const editableAttribute = canEditThisRow ? 'contenteditable="true"' : '';
-            const nonEditableClass = canEditThisRow ? '' : 'bg-gray-200 text-gray-500 cursor-not-allowed';
             
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50 cursor-pointer';
-            row.dataset.rowIndex = item.rowIndex; 
-
-            row.innerHTML = `
-                <td class="px-4 py-2 border-b text-sm font-bold">${item.data[0] || ''}</td>
-                <td class="px-4 py-2 border-b text-sm">${item.data[1] || ''}</td>
-                <td class="px-4 py-2 border-b text-sm">${item.data[2] || ''}</td>
-                <td class="px-4 py-2 border-b text-sm">${item.data[3] || ''}</td>
-                <td class="px-4 py-2 border-b text-sm">${item.data[4] || ''}</td>
-                <td class="px-4 py-2 border-b text-sm">${item.data[5] || ''}</td>
-                <td class="px-4 py-2 border-b text-sm">${item.data[6] || ''}</td>
-                <td class="px-4 py-2 border-b text-sm">${formatDateForDisplay(item.data[7])}</td>
-                <td class="px-4 py-2 border-b text-sm">${item.data[8] || ''}</td>
-                <td class="px-4 py-2 border-b text-sm ${nonEditableClass}" ${editableAttribute} data-col="J">${formatTimeForDisplay(item.data[9])}</td>
-                <td class="px-4 py-2 border-b text-sm ${nonEditableClass}" ${editableAttribute} data-col="K">${formatTimeForDisplay(item.data[10])}</td>
-            `;
-
-            row.addEventListener('click', (e) => {
-                if (e.target.isContentEditable) return;
-                openModal(item.data);
-            });
-            return row;
-        }
-
-        function updateSummary(data) {
-            const total = data.length;
-            const females = data.filter(item => item.data[5] === 'ស្រី').length;
-            getEl('total-employees').textContent = total;
-            getEl('female-employees').textContent = females;
-            getEl('male-employees').textContent = total - females;
-        }
-        
-        function updateSortIcons() {
-             document.querySelectorAll('.sortable-header').forEach(header => {
-                const icon = header.querySelector('.sort-icon');
-                if(icon) icon.remove();
-                
-                const colIndex = parseInt(header.dataset.colIndex, 10);
-                if (state.sortConfig.index === colIndex) {
-                    header.classList.add('sorted');
-                    const newIcon = document.createElement('span');
-                    newIcon.className = 'sort-icon';
-                    newIcon.innerHTML = '▲';
-                    if (state.sortConfig.direction === 'desc') newIcon.classList.add('desc');
-                    header.appendChild(newIcon);
-                } else {
-                    header.classList.remove('sorted');
-                }
-            });
-        }
-
-        async function updateData() {
-            const editedRows = document.querySelectorAll('tr.edited');
-            if (editedRows.length === 0) {
-                showToast('មិនមានការកែប្រែដើម្បីរក្សាទុកទេ។', 'error');
-                return;
-            }
-            const updates = Array.from(editedRows).map(row => ({
-                rowIndex: row.dataset.rowIndex,
-                checkIn: row.cells[9].textContent.trim(),
-                checkOut: row.cells[10].textContent.trim()
-            }));
-
-            DOM.updateDataBtn.disabled = true;
-            DOM.saveText.textContent = 'កំពុងរក្សាទុក';
-            DOM.saveSpinner.classList.remove('hidden');
-            DOM.saveIcon.classList.add('hidden');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            try {
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ updates })
-                });
-                const result = await response.json();
-                if (result.status !== 'success') throw new Error(result.message || 'Unknown error');
-                
-                showToast(`បានរក្សាទុក ${result.updatedRows} records ដោយជោគជ័យ!`, 'success');
-                
-                if (state.currentMode === 'incomplete') {
-                    const completedRowIndices = updates
-                        .filter(u => u.checkIn && u.checkOut)
-                        .map(u => u.rowIndex.toString());
-                    if (completedRowIndices.length > 0) {
-                        state.allData = state.allData.filter(item => !completedRowIndices.includes(item.rowIndex.toString()));
-                        applyFiltersAndRender();
-                    }
-                }
-                editedRows.forEach(row => row.classList.remove('edited'));
+            const matcherThreshold = isProfile ? 0.6 : 0.5;
+            const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, matcherThreshold);
+            const bestMatch = faceMatcher.findBestMatch(finalDescriptor);
+            const label = bestMatch.label === 'unknown' ? 'មិនស្គាល់' : JSON.parse(bestMatch.label).name;
 
-            } catch (error) {
-                showToast(`មានបញ្ហាក្នុងការរក្សាទុក: ${error.message}`, 'error');
-            } finally {
-                 DOM.updateDataBtn.disabled = document.querySelectorAll('tr.edited').length === 0;
-                 DOM.saveText.textContent = 'រក្សាទុក';
-                 DOM.saveSpinner.classList.add('hidden');
-                 DOM.saveIcon.classList.remove('hidden');
-            }
+            new faceapi.draw.DrawBox(box, { label }).draw(canvas);
+            new faceapi.draw.DrawFaceLandmarks(landmarks, { drawLines: true, color: '#34d399' }).draw(canvas);
+
+            const allMatches = labeledFaceDescriptors.map(ld => {
+                const distance = faceapi.euclideanDistance(finalDescriptor, ld.descriptors[0]);
+                return { distance, labelData: JSON.parse(ld.label) };
+            }).sort((a, b) => a.distance - b.distance);
+            
+            await displayFaceResults(allMatches.slice(0, 4), analysisMode);
         }
-        
-        // --- MODAL & PHOTO FUNCTIONS ---
-        async function fetchEmployeePhoto(employeeId) {
-            DOM.employeePhoto.src = `https://placehold.co/128x128/EBF4FF/7F9CF5?text=Loading...`;
-            if (!employeeId) {
-                DOM.employeePhoto.src = `https://placehold.co/128x128/EBF4FF/7F9CF5?text=No+ID`;
-                return;
+
+        async function animateVerification(card) {
+            const verificationContainer = card.querySelector('.verification-details');
+            if (!verificationContainer) return;
+            await new Promise(res => setTimeout(res, 400));
+            verificationContainer.classList.remove('hidden');
+
+            const features = verificationContainer.querySelectorAll('ul li');
+            const featureNames = {
+                structure: 'ទម្រង់មុខ',
+                eyes: 'ទីតាំងភ្នែក',
+                symmetry: 'ស៊ីមេទ្រីផ្ទៃមុខ',
+                goldenRatio: 'សមាមាត្រមាស',
+                texture: 'វាយនភាពស្បែក'
             };
 
-            try {
-                const result = await apiCall('getPhoto', { id: employeeId });
-                DOM.employeePhoto.src = result.photoUrl || `https://placehold.co/128x128/EBF4FF/7F9CF5?text=No+Photo`;
-            } catch (error) {
-                DOM.employeePhoto.src = `https://placehold.co/128x128/EBF4FF/7F9CF5?text=Error`;
-            }
-        }
-
-        function openModal(data) {
-            getEl('modal-name').textContent = data[4] || 'N/A';
-            getEl('modal-id').textContent = data[6] || 'N/A';
-            getEl('modal-department').textContent = data[3] || 'N/A';
-            getEl('modal-gender').textContent = data[5] || 'N/A';
-            getEl('modal-class').textContent = data[2] || 'N/A';
-            getEl('modal-group').textContent = data[1] || 'N/A';
-            getEl('modal-date').textContent = formatDateForDisplay(data[7]) || 'N/A';
-            getEl('modal-checkin').textContent = formatTimeForDisplay(data[9]) || 'N/A';
-            getEl('modal-checkout').textContent = formatTimeForDisplay(data[10]) || 'N/A';
-
-            fetchEmployeePhoto(data[6]);
-            DOM.detailModal.classList.remove('hidden');
-        }
-
-        // --- AUTHENTICATION FUNCTIONS ---
-        function populateUserDropdown() {
-            const fragment = document.createDocumentFragment();
-            for (const email in USERS) {
-                const option = document.createElement('option');
-                option.value = email;
-                option.textContent = USERS[email];
-                fragment.appendChild(option);
-            }
-            DOM.userSelect.appendChild(fragment);
-        }
-        
-        function startOtpCooldown() {
-            state.otpCooldown = 30;
-            DOM.sendOtpBtn.disabled = true;
-            const interval = setInterval(() => {
-                state.otpCooldown--;
-                if (state.otpCooldown > 0) {
-                    DOM.sendOtpText.textContent = `ផ្ញើម្ដងទៀត (${state.otpCooldown}វិនាទី)`;
-                } else {
-                    clearInterval(interval);
-                    DOM.sendOtpBtn.disabled = false;
-                    DOM.sendOtpText.textContent = 'ផ្ញើលេខកូដ (OTP) ម្ដងទៀត';
-                }
-            }, 1000);
-        }
-
-        async function handleSendOtp() {
-            const selectedEmail = DOM.userSelect.value;
-            if (!selectedEmail) {
-                showLoginStatus('សូមជ្រើសរើសឈ្មោះរបស់អ្នកជាមុនសិន', true);
-                return;
-            }
-
-            DOM.sendOtpBtn.disabled = true;
-            DOM.sendOtpText.textContent = 'កំពុងផ្ញើ...';
-            showLoginStatus('');
-
-            try {
-                await apiCall('sendOtp', { email: selectedEmail });
-                DOM.loginForm.classList.add('hidden');
-                DOM.otpForm.classList.remove('hidden');
-                DOM.userEmailDisplay.textContent = selectedEmail;
-                showLoginStatus('លេខកូដត្រូវបានផ្ញើដោយជោគជ័យ', false);
-                DOM.otpInput.focus();
-                startOtpCooldown();
-            } catch (error) {
-                showLoginStatus(`មានបញ្ហាក្នុងការផ្ញើ OTP: ${error.message}`, true);
-                DOM.sendOtpBtn.disabled = false;
-                DOM.sendOtpText.textContent = 'ផ្ញើលេខកូដ (OTP) ម្ដងទៀត';
-            }
-        }
-
-        async function handleVerifyOtp() {
-            const selectedEmail = DOM.userSelect.value;
-            const otp = DOM.otpInput.value;
-            if (otp.length !== 6) {
-                showLoginStatus('សូមបញ្ចូលលេខកូដ OTP 6 ខ្ទង់', true);
-                return;
-            }
-            
-            DOM.verifyOtpBtn.disabled = true;
-            DOM.verifyOtpBtn.textContent = 'កំពុងផ្ទៀងផ្ទាត់...';
-            showLoginStatus('');
-
-            try {
-                await apiCall('verifyOtp', { email: selectedEmail, otp });
-                const loggedInUser = { email: selectedEmail, name: USERS[selectedEmail] };
-                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-                showMainContent(loggedInUser);
-            } catch (error) {
-                 showLoginStatus(`ការផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវ: ${error.message}`, true);
-            } finally {
-                DOM.verifyOtpBtn.disabled = false;
-                DOM.verifyOtpBtn.textContent = 'បញ្ជាក់ និងចូលប្រើ';
+            for (const feature of features) {
+                await new Promise(res => setTimeout(res, 250));
+                const featureKey = feature.dataset.feature;
+                feature.querySelector('span').innerHTML = `
+                    <span class="text-emerald-400 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                        ${featureNames[featureKey]}: <span class="ml-2 font-bold text-white">ផ្ទៀងផ្ទាត់រួចរាល់</span>
+                    </span>
+                `;
+                playSound('scan');
             }
         }
         
-        function handleLogout() {
-            localStorage.removeItem('loggedInUser');
-            state.currentUser = null;
-            DOM.loginScreen.classList.remove('hidden');
-            DOM.mainContent.classList.add('hidden');
-            DOM.otpInput.value = '';
-            DOM.userSelect.value = '';
-            DOM.loginForm.classList.remove('hidden');
-            DOM.otpForm.classList.add('hidden');
-            showLoginStatus('');
-        }
-        
-        function showMainContent(user) {
-            state.currentUser = user;
-            DOM.loginScreen.classList.add('hidden');
-            DOM.mainContent.classList.remove('hidden');
-            DOM.loggedInUserSpan.textContent = user.name;
-            if (validateWebAppUrl() && DOM.dateFilter.value) {
-                fetchData();
-            } else if (validateWebAppUrl()) {
-                showStatus('សូមជ្រើសរើសកាលបរិច្ឆេទ ដើម្បីបង្ហាញទិន្នន័យ។');
+        async function displayFaceResults(matches, analysisMode) {
+            logToAIAssistant('ការវិភាគបានបញ្ចប់។ កំពុងបង្ហាញលទ្ធផល...');
+            resultsDiv.innerHTML = ''; 
+            const faceResultContainer = document.createElement('div');
+            faceResultContainer.className = 'p-1';
+            resultsDiv.appendChild(faceResultContainer);
+
+            for (const [index, match] of matches.entries()) {
+                const { distance, labelData } = match;
+                const confidence = Math.max(0, (1 - distance) * 100).toFixed(2);
+                
+                let cardClasses = 'bg-black/50 p-3 rounded-lg border border-emerald-500/30 flex items-start space-x-4 mb-2 relative overflow-hidden result-card';
+                let nameBlock = '<p class="data-name text-lg font-bold text-white"></p>';
+                let verificationSection = '';
+                
+                if (index === 0) {
+                    cardClasses = 'bg-black/50 p-3 rounded-lg border-2 border-emerald-400 flex items-start space-x-4 mb-2 relative overflow-hidden result-card';
+                    nameBlock = `
+                        <div class="flex items-center gap-2">
+                            <p class="data-name text-lg font-bold text-white"></p>
+                            <span class="text-xs bg-emerald-500 text-black font-bold py-0.5 px-1.5 rounded font-khmer">ផ្គូផ្គងល្អបំផុត</span>
+                        </div>
+                    `;
+                    verificationSection = `
+                        <div class="verification-details mt-3 pt-3 border-t border-emerald-500/30 hidden">
+                            <h4 class="text-sm font-bold text-emerald-300 mb-2 font-khmer">ការវិភាគ Biometric កម្រិតខ្ពស់</h4>
+                            <ul class="text-xs space-y-1">
+                                <li data-feature="structure"><span>កំពុងវិភាគ ទម្រង់មុខ...</span></li>
+                                <li data-feature="eyes"><span>កំពុងវិភាគ ទីតាំងភ្នែក...</span></li>
+                                <li data-feature="symmetry"><span>កំពុងវិភាគ ស៊ីមេទ្រីផ្ទៃមុខ...</span></li>
+                                <li data-feature="goldenRatio"><span>កំពុងវិភាគ សមាមាត្រមាស...</span></li>
+                                <li data-feature="texture"><span>កំពុងវិភាគ វាយនភាពស្បែក...</span></li>
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                const resultCard = document.createElement('div');
+                resultCard.className = cardClasses;
+                
+                 const analysisModeText = `<p class="text-xs text-cyan-400 mt-1">របៀបវិភាគ: ${analysisMode}</p>`;
+
+                const cardContent = `
+                    <div class="relative w-20 h-24 flex-shrink-0">
+                        <img src="${labelData.imageUrl}" class="w-full h-full object-cover rounded-md border-2 border-emerald-600" alt="Matched Photo" onerror="this.src='https://placehold.co/80x96/000000/34d399?text=Error'">
+                    </div>
+                    <div class="flex-grow">
+                        ${nameBlock}
+                        <p class="data-name-km text-md text-gray-300"></p>
+                        <p class="data-id text-sm text-gray-400"></p>
+                        <p class="data-gender text-sm text-gray-400"></p>
+                        <p class="data-distance text-sm text-gray-400"></p>
+                        <div class="mt-2">
+                            <span class="data-confidence font-semibold ${confidence > 50 ? 'text-emerald-400' : 'text-yellow-400'}"></span>
+                        </div>
+                        ${analysisModeText}
+                        ${verificationSection}
+                    </div>
+                `;
+                resultCard.innerHTML = cardContent;
+                faceResultContainer.appendChild(resultCard);
+                playSound(index === 0 ? 'beep' : 'scan');
+
+                typeWriter(resultCard.querySelector('.data-name'), labelData.name);
+                await new Promise(res => setTimeout(res, 100));
+                typeWriter(resultCard.querySelector('.data-name-km'), labelData.nameKm);
+                await new Promise(res => setTimeout(res, 100));
+                typeWriter(resultCard.querySelector('.data-id'), `អត្តលេខ: ${labelData.id}`);
+                await new Promise(res => setTimeout(res, 100));
+                typeWriter(resultCard.querySelector('.data-gender'), `ភេទ: ${labelData.gender}`);
+                await new Promise(res => setTimeout(res, 100));
+                typeWriter(resultCard.querySelector('.data-distance'), `ពិន្ទុគម្លាត: ${distance.toFixed(4)}`);
+                await new Promise(res => setTimeout(res, 100));
+                typeWriter(resultCard.querySelector('.data-confidence'), `ទំនុកចិត្ត: ${confidence}%`);
+
+                if (index === 0) {
+                    await animateVerification(resultCard);
+                }
+
+                await new Promise(res => setTimeout(res, 400));
             }
         }
-
-        function checkLoginSession() {
-            const storedUser = localStorage.getItem('loggedInUser');
-            if (!storedUser) return;
-            try {
-                const user = JSON.parse(storedUser);
-                if (user && user.email && user.name) {
-                    showMainContent(user);
-                }
-            } catch (e) {
-                localStorage.removeItem('loggedInUser');
-            }
-        }
-
-        // --- EVENT LISTENER SETUP ---
-        function setupEventListeners() {
-            DOM.dataTableBody.addEventListener('input', e => {
-                if (e.target.isContentEditable) {
-                    e.target.closest('tr').classList.add('edited');
-                    DOM.updateDataBtn.disabled = false;
-                }
-            });
-
-            DOM.dateFilter.addEventListener('change', fetchData);
-            DOM.searchInput.addEventListener('input', applyFiltersAndRender);
-            DOM.updateDataBtn.addEventListener('click', updateData);
-            DOM.sendOtpBtn.addEventListener('click', handleSendOtp);
-            DOM.verifyOtpBtn.addEventListener('click', handleVerifyOtp);
-            DOM.logoutBtn.addEventListener('click', handleLogout);
-            
-            DOM.detailModal.addEventListener('click', (e) => {
-                if (e.target === DOM.detailModal || e.target === DOM.closeModalBtn || e.target.closest('button') === DOM.closeModalBtn) {
-                    DOM.detailModal.classList.add('hidden');
-                }
-            });
-
-            DOM.incompleteDataBtn.addEventListener('click', () => {
-                const btn = DOM.incompleteDataBtn;
-                const span = btn.querySelector('span');
-                if (state.currentMode === 'date') {
-                    state.currentMode = 'incomplete';
-                    DOM.dateFilterWrapper.classList.add('hidden');
-                    DOM.searchInput.value = '';
-                    fetchIncompleteData();
-                    
-                    btn.classList.replace('bg-orange-500', 'bg-blue-500');
-                    btn.classList.replace('hover:bg-orange-600', 'hover:bg-blue-600');
-                    span.textContent = 'ត្រឡប់ទៅ Filter តាមកាលបរិច្ឆេទ';
-                } else {
-                    state.currentMode = 'date';
-                    DOM.dateFilterWrapper.classList.remove('hidden');
-                    state.allData = [];
-                    applyFiltersAndRender();
-                    
-                    if (DOM.dateFilter.value) {
-                        fetchData();
-                    } else {
-                        showStatus('សូមជ្រើសរើសកាលបរិច្ឆេទ ដើម្បីបង្ហាញទិន្នន័យ។');
-                    }
-                    
-                    btn.classList.replace('bg-blue-500', 'bg-orange-500');
-                    btn.classList.replace('hover:bg-blue-600', 'hover:bg-orange-600');
-                    span.textContent = 'បង្ហាញទិន្នន័យមិនពេញលេញ (ទាំងអស់)';
-                }
-            });
-            
-            document.querySelectorAll('.sortable-header').forEach(header => {
-                header.addEventListener('click', () => {
-                    const index = parseInt(header.dataset.colIndex, 10);
-                    if (state.sortConfig.index === index) {
-                        state.sortConfig.direction = state.sortConfig.direction === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        state.sortConfig.index = index;
-                        state.sortConfig.direction = 'asc';
-                    }
-                    applyFiltersAndRender();
-                });
-            });
-        }
-        
-        // --- INITIALIZATION ---
-        window.addEventListener('DOMContentLoaded', () => {
-            DOM.dateFilter.value = formatDateForAPI(new Date());
-            populateUserDropdown();
-            setupEventListeners();
-            checkLoginSession();
-        });
+        initialize();
     </script>
 </body>
 </html>
