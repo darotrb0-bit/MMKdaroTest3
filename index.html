@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ប្រព័ន្ធសម្គាល់ផ្ទៃមុខ</title>
+    <title>ប្រព័ន្ធសម្គាល់ផ្ទៃមុខ v3.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,20 @@
     <style>
         body {
             font-family: 'Fira Code', monospace;
-            background-color: #0d1117;
+            /* OLD: background-color: #0d1117; */
+            
+            /* --- NEW HACKER BACKGROUND --- */
+            background-color: #000000; /* Deep black base */
+            background-image:
+                /* 1. Faint grid lines */
+                repeating-linear-gradient(to right, #4ade801a 0px, #4ade801a 1px, transparent 1px, transparent 50px),
+                repeating-linear-gradient(to bottom, #4ade801a 0px, #4ade801a 1px, transparent 1px, transparent 50px),
+                /* 2. Dark radial vignette for depth */
+                radial-gradient(ellipse at center, #162a1f 0%, #000000 100%);
+            
+            background-attachment: fixed; /* Keep background static on scroll */
+            /* --- END NEW BACKGROUND --- */
+
             color: #c9d1d9;
             overflow-y: auto;
         }
@@ -21,16 +34,19 @@
             font-family: 'Koulen', cursive;
         }
         .hacker-glow {
-            text-shadow: 0 0 5px rgba(52, 211, 153, 0.7), 0 0 10px rgba(52, 211, 153, 0.5);
+            /* NEW: Brighter Green Glow */
+            text-shadow: 0 0 5px rgba(74, 222, 128, 0.7), 0 0 10px rgba(74, 222, 128, 0.5);
         }
         .hacker-border {
-            border: 1px solid #34d399;
-            box-shadow: 0 0 10px #34d399, inset 0 0 10px #34d399;
+            /* NEW: Brighter Green Border */
+            border: 1px solid #4ade80;
+            box-shadow: 0 0 10px #4ade80, inset 0 0 10px #4ade80;
             transition: all 0.5s ease-in-out;
         }
         input[type="file"]::file-selector-button {
-            background-color: #10b981;
-            color: #0d1117;
+            /* NEW: Brighter Green Button */
+            background-color: #22c55e;
+            color: #000000;
             border: none;
             padding: 0.5rem 1rem;
             border-radius: 0.25rem;
@@ -38,8 +54,9 @@
             transition: all 0.3s ease;
         }
         input[type="file"]::file-selector-button:hover {
-            background-color: #34d399;
-            box-shadow: 0 0 15px #34d399;
+            /* NEW: Brighter Green Hover */
+            background-color: #4ade80;
+            box-shadow: 0 0 15px #4ade80;
         }
         
         .target-panel {
@@ -70,7 +87,8 @@
         .typing-effect::after {
             content: '█';
             animation: blink 0.7s infinite;
-            color: #34d399;
+            /* NEW: Brighter Green */
+            color: #4ade80;
         }
 
         @keyframes blink {
@@ -97,8 +115,9 @@
         .scan-beam > div {
             position: absolute;
             height: 2px;
-            background: #34d399;
-            box-shadow: 0 0 8px 1px #34d399;
+            /* NEW: Brighter Green */
+            background: #4ade80;
+            box-shadow: 0 0 8px 1px #4ade80;
         }
         @keyframes shoot-beam {
             0% { opacity: 1; transform: scaleX(0); }
@@ -110,7 +129,8 @@
         #face-tooltip {
             position: fixed;
             background-color: rgba(0, 0, 0, 0.8);
-            color: #34d399;
+            /* NEW: Brighter Green */
+            color: #4ade80;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
@@ -135,8 +155,9 @@
             width: 100%;
             height: 100%;
             background-image: 
-                linear-gradient(to right, rgba(52, 211, 153, 0.5) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(52, 211, 153, 0.5) 1px, transparent 1px);
+                /* NEW: Brighter Green */
+                linear-gradient(to right, rgba(74, 222, 128, 0.5) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(74, 222, 128, 0.5) 1px, transparent 1px);
             background-size: 20px 20px;
             animation: scan-grid-animation 2s linear infinite;
         }
@@ -145,8 +166,9 @@
             left: 0;
             width: 100%;
             height: 2px;
-            background: #34d399;
-            box-shadow: 0 0 10px #34d399;
+            /* NEW: Brighter Green */
+            background: #4ade80;
+            box-shadow: 0 0 10px #4ade80;
             animation: deep-scan-line-animation 1.5s ease-out forwards;
         }
         @keyframes scan-grid-animation {
@@ -161,7 +183,8 @@
         /* AI Assistant Log */
         #ai-assistant-log {
             background-color: #00000080;
-            border: 1px solid #34d39960;
+            /* NEW: Brighter Green */
+            border: 1px solid #4ade8060;
             padding: 0.75rem;
             margin-bottom: 1rem;
             border-radius: 0.5rem;
@@ -174,24 +197,200 @@
             line-height: 1.5;
         }
         #ai-assistant-log .log-entry {
-            color: #34d399;
+            /* NEW: Brighter Green */
+            color: #4ade80;
         }
          #ai-assistant-log .log-entry.warn {
             color: #facc15;
         }
+        #ai-assistant-log .log-entry.critical {
+            color: #f87171;
+            font-weight: bold;
+        }
+
+        /* --- NEW: Result Layout Styles --- */
+        #results-layout {
+            height: 340px; /* Constrain height */
+        }
+        
+        /* --- NEW: Other Match Card Styles --- */
+        .other-match-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #00000030;
+            /* NEW: Brighter Green */
+            border: 1px solid #4ade8030;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: pop-in 0.5s forwards;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .other-match-card:hover {
+            background: #00000070;
+            /* NEW: Brighter Green */
+            border-color: #4ade8080;
+        }
+        .confidence-bar-bg {
+            background: #ffffff20;
+            border-radius: 99px;
+            height: 6px;
+            width: 100%;
+        }
+        .confidence-bar {
+            background: #facc15; /* Yellow default */
+            height: 100%;
+            border-radius: 99px;
+            transition: width 0.5s ease-out;
+        }
+
+        /* --- NEW: Confidence Gauge --- */
+        .confidence-gauge {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            /* NEW: Brighter Green */
+            background: conic-gradient(from 0deg at 50% 50%, #4ade80 0deg, #4ade80 var(--confidence-angle, 0deg), #1f2937 var(--confidence-angle, 0deg), #1f2937 360deg);
+            transition: --confidence-angle 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .confidence-gauge::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            /* NEW: Match new card bg */
+            background: #000000;
+            border-radius: 50%;
+        }
+        .confidence-gauge-text {
+            position: relative;
+            z-index: 10;
+            font-size: 1.25rem;
+            font-weight: bold;
+            /* NEW: Brighter Green */
+            color: #4ade80;
+        }
+        .confidence-gauge-label {
+            position: absolute;
+            bottom: -20px;
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        /* --- NEW: Animated Hacker Border & Corners --- */
+        .animated-hacker-border {
+            position: relative;
+            /* NEW: Match new body bg */
+            background: #000000;
+            border-radius: 0.5rem; /* 8px */
+            overflow: hidden; /* Crucial for the effect */
+            padding: 2px; /* The "thickness" of the border */
+            z-index: 1; /* For stacking context */
+        }
+        .animated-hacker-border::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%; /* Make it large enough to cover corners when rotating */
+            height: 200%;
+            background: conic-gradient(
+                transparent, 
+                transparent, 
+                transparent,
+                /* NEW: Brighter Green */
+                #4ade80,
+                transparent,
+                transparent
+            );
+            z-index: -2;
+            animation: rotate-border 6s linear infinite;
+        }
+        /* The "inner" content box that hides the spinning gradient */
+        .hacker-card-content {
+            background: #00000099; /* Slightly transparent black */
+            backdrop-filter: blur(5px); /* Add a nice glassmorphism effect */
+            padding: 1rem; /* 16px */
+            border-radius: 0.375rem; /* 6px (slightly less than parent) */
+            z-index: 10;
+            position: relative; /* Needed for corners */
+        }
+        
+        @keyframes rotate-border {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* The corner elements */
+        .hacker-corner {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-style: solid;
+            /* NEW: Brighter Green */
+            border-color: #4ade80;
+            opacity: 0.7;
+        }
+        .hacker-corner-tl { /* Top-Left */
+            top: -1px;
+            left: -1px;
+            border-width: 2px 0 0 2px;
+        }
+        .hacker-corner-tr { /* Top-Right */
+            top: -1px;
+            right: -1px;
+            border-width: 2px 2px 0 0;
+        }
+        .hacker-corner-bl { /* Bottom-Left */
+            bottom: -1px;
+            left: -1px;
+            border-width: 0 0 2px 2px;
+        }
+        .hacker-corner-br { /* Bottom-Right */
+            bottom: -1px;
+            right: -1px;
+            border-width: 0 2px 2px 0;
+        }
+
 
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-5xl mx-auto relative">
         <header class="text-center mb-6">
-            <h1 class="text-2xl md:text-4xl font-bold text-emerald-400 hacker-glow font-khmer">ប្រព័ន្ធសម្គាល់ផ្ទៃមុខ</h1>
+            <!-- NEW: Brighter Green -->
+            <h1 class="text-2xl md:text-4xl font-bold text-green-400 hacker-glow font-khmer">ប្រព័ន្ធសម្គាល់ផ្ទៃមុខ v3.0</h1>
             <p class="text-sm text-gray-400 mt-2">បញ្ចូលរូបភាពដើម្បីកំណត់អត្តសញ្ញាណបុគ្គលពីក្នុងមូលដ្ឋានទិន្នន័យ។</p>
         </header>
 
+        <!-- 
+        ================================================================================
+        (!!!) ហានិភ័យសុវត្ថិភាពធ្ងន់ធ្ងរ (!!!)
+        ================================================================================
+        កូដខាងក្រោមនេះ បង្ហាញ GOOGLE_API_KEY របស់អ្នកជាសាធារណៈ។
+        ជនខិលខូចអាចលួច Key នេះ យកទៅប្រើប្រាស់ និងធ្វើឱ្យអ្នកអស់ Quota ឬខាតបង់ថវិកា។
+
+        **ដំណោះស្រាយ (ល្អបំផុត):**
+        អ្នកត្រូវតែបង្កើត Backend (ឧ. Google Apps Script, Node.js, ឬ Cloud Function)
+        1.  Backend នេះនឹងទទួលខុសត្រូវក្នុងការហៅទៅ Google Sheets API ដោយសុវត្ថិភាព។
+        2.  Frontend (កូដនេះ) ហៅទៅ Backend URL របស់អ្នក ជំនួសឱ្យការហៅទៅ Google Sheets ដោយផ្ទាល់។
+
+        **ដំណោះស្រាយ (បណ្ដោះអាសន្ន):**
+        សូមចូលទៅកាន់ Google Cloud Console របស់អ្នក ហើយកំណត់ API Key នេះឱ្យអាចប្រើបានតែពី
+        **Domain គេហទំព័រ (Website Domain)** របស់អ្នកតែប៉ុណ្ណោះ។ នេះអាចជួយការពារបានខ្លះ។
+        ================================================================================
+        -->
+
         <main id="mainGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div id="targetPanel" class="bg-gray-900/50 p-4 rounded-lg hacker-border relative overflow-hidden target-panel">
-                <h2 class="text-lg font-semibold text-emerald-400 mb-4 border-b border-emerald-500/30 pb-2 font-khmer">រូបភាពគោលដៅ</h2>
+                <!-- NEW: Brighter Green -->
+                <h2 class="text-lg font-semibold text-green-400 mb-4 border-b border-green-400/30 pb-2 font-khmer">រូបភាពគោលដៅ</h2>
                 <div id="imageContainer" class="relative min-h-[250px] flex items-center justify-center bg-black rounded-md">
                     <canvas id="canvas" class="absolute top-0 left-0 w-full h-full"></canvas>
                     <div id="uploadPrompt" class="text-center text-gray-500">
@@ -207,7 +406,8 @@
             </div>
 
             <div class="bg-gray-900/50 p-4 rounded-lg hacker-border flex flex-col">
-                <h2 class="text-lg font-semibold text-emerald-400 mb-4 border-b border-emerald-500/30 pb-2 font-khmer">AI វិភាគ & លទ្ធផល</h2>
+                <!-- NEW: Brighter Green -->
+                <h2 class="text-lg font-semibold text-green-400 mb-4 border-b border-green-400/30 pb-2 font-khmer">AI វិភាគ & លទ្ធផល</h2>
                  <!-- NEW AI Assistant Log -->
                 <div id="ai-assistant-log">
                     <p class="text-gray-500">AI Assistant: រង់ចាំបញ្ជា...</p>
@@ -215,8 +415,9 @@
                 <div id="results" class="flex-grow space-y-4 max-h-[340px] overflow-y-auto pr-2">
                      <p class="text-gray-500">លទ្ធផលនឹងបង្ហាញនៅទីនេះ។</p>
                 </div>
-                <div class="mt-4 pt-4 border-t border-emerald-500/30">
-                    <button id="newScanButton" class="hidden w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded transition-all duration-300 hacker-glow font-khmer">
+                <!-- NEW: Brighter Green -->
+                <div class="mt-4 pt-4 border-t border-green-400/30">
+                    <button id="newScanButton" class="hidden w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-all duration-300 hacker-glow font-khmer">
                         ចាប់ផ្តើមវិភាគសាជាថ្មី
                     </button>
                 </div>
@@ -227,10 +428,11 @@
     </div>
 
     <div id="loading" class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50 transition-opacity duration-500">
-        <div class="loader animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500"></div>
-        <p id="loadingText" class="text-emerald-400 mt-4 text-lg hacker-glow">កំពុងរៀបចំប្រព័ន្ធ...</p>
+        <!-- NEW: Brighter Green -->
+        <div class="loader animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-400"></div>
+        <p id="loadingText" class="text-green-400 mt-4 text-lg hacker-glow">កំពុងរៀបចំប្រព័ន្ធ...</p>
         <div class="w-64 mt-2 bg-gray-700 rounded-full h-2.5">
-            <div id="progressBar" class="bg-emerald-500 h-2.5 rounded-full" style="width: 0%"></div>
+            <div id="progressBar" class="bg-green-400 h-2.5 rounded-full" style="width: 0%"></div>
         </div>
         <p id="progressText" class="text-gray-400 text-sm mt-1"></p>
     </div>
@@ -253,15 +455,31 @@
         const deepScanOverlay = document.getElementById('deep-scan-overlay');
         const aiLog = document.getElementById('ai-assistant-log');
         
-        // IMPORTANT: Replace 'YOUR_API_KEY' with your actual Google Cloud API Key
-        const GOOGLE_API_KEY = 'AIzaSyBValEJuosFLeyoIELmb_XcXJoxUzSm3-c'; 
+        // (!!!) សូមជំនួសដោយ API Key របស់អ្នក (!!!)
+        // (!!!) សូមអាន Comment ព្រមានអំពីសុវត្ថិភាព នៅខាងលើ ក្នុង HTML (!!!)
+        const GOOGLE_API_KEY = 'AIzaSyBOttngnE7LvKwWntn3IN6PAXw--pElCyk'; // ដាក់ Key របស់អ្នកនៅទីនេះ
         const SHEET_ID = '1eRyPoifzyvB4oBmruNyXcoKMKPRqjk6xDD6-bPNW6pc';
-        const RANGES = ['DIList!E9:E', 'DIList!L9:L', 'DIList!M9:M', 'DIList!N9:N', 'DIList!AA9:AA'];
+        const RANGES = ['DIList!E9:E', 'DIList!L9:L', 'DIList!M9:M', 'DIList!N9:N', 'DIList!AA9:AA', 'DIList!G9:G', 'DIList!R9:R', 'DIList!S9:S'];
+        
+        // កំណែរបស់ Cache - ប្រសិនបើអ្នកផ្លាស់ប្តូរទិន្នន័យក្នុង Sheet សូមប្តូរលេខនេះ (ឧ. '1.1') ដើម្បីបង្ខំឱ្យផ្ទុកឡើងវិញ
+        const CACHE_VERSION = '1.1';
+        const CACHE_KEY = `faceDatabase_v${CACHE_VERSION}`;
 
         let labeledFaceDescriptors;
         let audioCtx;
         let interactiveDetections = [];
         let hoveredFaceIndex = -1;
+
+        // --- ផែនទីសម្រាប់បកប្រែអារម្មណ៍ ---
+        const expressionMap = {
+            neutral: 'ធម្មតា',
+            happy: 'សប្បាយចិត្ត',
+            sad: 'កើតទុក្ខ',
+            angry: 'ខឹង',
+            fearful: 'ភ័យខ្លាច',
+            disgusted: 'ខ្ពើមរអើម',
+            surprised: 'ភ្ញាក់ផ្អើល'
+        };
 
         function initAudio() {
             if (!audioCtx) {
@@ -280,6 +498,8 @@
 
             if (type === 'warn') {
                  newLog.className = 'log-entry warn';
+            } else if (type === 'critical') {
+                 newLog.className = 'log-entry critical';
             } else {
                  newLog.className = 'log-entry';
             }
@@ -291,6 +511,12 @@
         
         function playSound(type, ...args) {
             if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
             if (type === 'dataTransfer') {
                 const noise = audioCtx.createBufferSource();
                 const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.5, audioCtx.sampleRate);
@@ -316,36 +542,47 @@
                 noise.stop(audioCtx.currentTime + 0.5);
 
             } else if (type === 'deepScan') {
-                const oscillator = audioCtx.createOscillator();
                 oscillator.type = 'sawtooth';
                 oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
                 oscillator.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 1.4);
-
-                const gainNode = audioCtx.createGain();
                 gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.4);
-                
-                oscillator.connect(gainNode).connect(audioCtx.destination);
                 oscillator.start();
                 oscillator.stop(audioCtx.currentTime + 1.5);
-            }
-             else {
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                 if (type === 'beep') {
-                    oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
-                } else if (type === 'scan') {
-                    oscillator.type = 'sawtooth';
-                    oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
-                    gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
-                }
+
+            } else if (type === 'confirm') {
+                gainNode.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.01);
+                /* NEW: Brighter Sound */
+                oscillator.frequency.setValueAtTime(1300, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.05);
+                
+                setTimeout(() => {
+                    const osc2 = audioCtx.createOscillator();
+                    const gain2 = audioCtx.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(audioCtx.destination);
+                    gain2.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gain2.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.01);
+                    /* NEW: Brighter Sound */
+                    osc2.frequency.setValueAtTime(1700, audioCtx.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
+                    osc2.start();
+                    osc2.stop(audioCtx.currentTime + 0.05);
+                }, 70);
+
+            } else { // 'beep' or 'scan'
+                oscillator.type = (type === 'beep') ? 'sine' : 'sawtooth';
+                /* NEW: Brighter Sound */
+                const freqStart = (type === 'beep') ? 950 : 100;
+                const freqEnd = (type === 'beep') ? 950 : 800;
+                const gainStart = (type === 'beep') ? 0.1 : 0.05;
+
+                oscillator.frequency.setValueAtTime(freqStart, audioCtx.currentTime);
+                if (type === 'scan') oscillator.frequency.exponentialRampToValueAtTime(freqEnd, audioCtx.currentTime + 0.1);
+                gainNode.gain.linearRampToValueAtTime(gainStart, audioCtx.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
                 oscillator.start(audioCtx.currentTime);
                 oscillator.stop(audioCtx.currentTime + 0.1);
             }
@@ -375,7 +612,8 @@
                 faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
                 faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
                 faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-                faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
+                faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL),
+                faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL) // ម៉ូឌែលថ្មី
             ]);
         }
         
@@ -383,14 +621,14 @@
             loadingText.textContent = 'កំពុងភ្ជាប់ទៅមូលដ្ឋានទិន្នន័យ...';
             progressBar.style.width = '20%';
             
-            if (GOOGLE_API_KEY === 'YOUR_API_KEY' || !GOOGLE_API_KEY) {
+            if (GOOGLE_API_KEY === 'YOUR_API_KEY_HERE' || !GOOGLE_API_KEY) {
                 const errorMsg = 'Error: GOOGLE API KEY មិន​ត្រូវ​បាន​កំណត់​ค่า​ទេ។ សូម​ដាក់​ API Key របស់​អ្នក​នៅ​ក្នុង​កូដ។';
                 loadingText.textContent = errorMsg;
                 setTimeout(() => {
                     loadingDiv.style.opacity = '0';
                     loadingDiv.style.pointerEvents = 'none';
-                    logToAIAssistant(errorMsg, 'warn');
-                }, 1500);
+                    logToAIAssistant(errorMsg, 'critical');
+                }, 2500);
                 return [];
             }
             
@@ -402,14 +640,20 @@
                 const data = await response.json();
                 loadingText.textContent = 'កំពុងដំណើរការទិន្នន័យ...';
                 progressBar.style.width = '30%';
-                const [ids, namesKm, names, genders, imageUrls] = data.valueRanges.map(range => range.values || []);
+                const [ids, namesKm, names, genders, imageUrls, groups, classes, departments] = data.valueRanges.map(range => range.values || []);
                 const maxRows = Math.max(...(data.valueRanges.map(range => range.values ? range.values.length : 0)));
                 const database = [];
                 for (let i = 0; i < maxRows; i++) {
                     if (ids[i]?.[0] && imageUrls[i]?.[0]) {
                         database.push({
-                            id: ids[i]?.[0] || '', nameKm: namesKm[i]?.[0] || '', name: names[i]?.[0] || 'N/A',
-                            gender: genders[i]?.[0] || '', imageUrl: imageUrls[i]?.[0]
+                            id: ids[i]?.[0] || '',
+                            nameKm: namesKm[i]?.[0] || '',
+                            name: names[i]?.[0] || 'N/A',
+                            gender: genders[i]?.[0] || '',
+                            imageUrl: imageUrls[i]?.[0],
+                            group: groups[i]?.[0] || 'N/A',
+                            class: classes[i]?.[0] || 'N/A',
+                            department: departments[i]?.[0] || 'N/A'
                         });
                     }
                 }
@@ -421,8 +665,8 @@
                 setTimeout(() => {
                     loadingDiv.style.opacity = '0';
                     loadingDiv.style.pointerEvents = 'none';
-                    logToAIAssistant(`${errorMsg} សូមពិនិត្យ API Key, Sheet ID, និងការអនុញ្ញាត (Permissions) របស់ Sheet។`, 'warn');
-                }, 1500);
+                    logToAIAssistant(`${errorMsg} សូមពិនិត្យ API Key, Sheet ID, និងការអនុញ្ញាត (Permissions) របស់ Sheet។`, 'critical');
+                }, 2500);
                 return [];
             }
         }
@@ -430,12 +674,14 @@
         async function buildFaceDatabase() {
             const database = await fetchDataFromGoogleSheet();
             if (database.length === 0) {
-                if (!loadingText.textContent.startsWith('Error')) loadingText.textContent = 'Error: មូលដ្ឋានទិន្នន័យទទេ ឬមិនត្រឹមត្រូវ។';
-                return [];
+                 if (!loadingText.textContent.startsWith('Error')) loadingText.textContent = 'Error: មូលដ្ឋានទិន្នន័យទទេ ឬមិនត្រឹមត្រូវ។';
+                 return null;
             }
             loadingText.textContent = 'កំពុងបង្កើតសន្ទស្សន៍មុខ...';
             let processedCount = 0;
             const totalCount = database.length;
+            progressText.textContent = `(0/${totalCount}) កំពុងរៀបចំ...`;
+
             const descriptors = await Promise.all(database.map(async (person) => {
                 try {
                     const imageUrl = `https://corsproxy.io/?${encodeURIComponent(person.imageUrl)}`;
@@ -456,16 +702,64 @@
                     return null;
                 }
             }));
-            return descriptors.filter(d => d !== null);
+            
+            const validDescriptors = descriptors.filter(d => d !== null);
+            
+            // រក្សាទុកក្នុង Cache
+            try {
+                const dataToCache = {
+                    timestamp: new Date().getTime(),
+                    descriptors: validDescriptors.map(ld => ld.toJSON()) // បំប្លែងទៅ JSON
+                };
+                localStorage.setItem(CACHE_KEY, JSON.stringify(dataToCache));
+                console.log('Face database cached successfully.');
+            } catch (e) {
+                console.error('Failed to cache face database:', e);
+                logToAIAssistant('Warning: មិនអាចរក្សាទុក Database ក្នុង Cache បានទេ។', 'warn');
+            }
+            
+            return validDescriptors;
         }
 
         async function initialize() {
             await loadModels();
-            labeledFaceDescriptors = await buildFaceDatabase();
+
+            // --- ពិនិត្យ Cache ---
+            let cachedData;
+            try {
+                const cachedString = localStorage.getItem(CACHE_KEY);
+                if (cachedString) {
+                    cachedData = JSON.parse(cachedString);
+                    // ប្រសិនបើ cache ចាស់ពេក (ឧ. លើសពី 1 ថ្ងៃ) អាចលុបចោលបាន
+                    // const oneDay = 1000 * 60 * 60 * 24;
+                    // if (new Date().getTime() - cachedData.timestamp > oneDay) {
+                    //     cachedData = null;
+                    //     localStorage.removeItem(CACHE_KEY);
+                    // }
+                }
+            } catch (e) {
+                console.error('Failed to read cache:', e);
+                localStorage.removeItem(CACHE_KEY);
+            }
+            // --------------------
+
+            if (cachedData) {
+                loadingText.textContent = 'កំពុងផ្ទុក Database ពី Cache...';
+                progressBar.style.width = '75%';
+                // បំប្លែង JSON ត្រឡប់ទៅជា LabeledFaceDescriptors វិញ
+                labeledFaceDescriptors = cachedData.descriptors.map(json => 
+                    faceapi.LabeledFaceDescriptors.fromJSON(json)
+                );
+                await new Promise(res => setTimeout(res, 500)); // ឱ្យ User បានឃើញ
+            } else {
+                labeledFaceDescriptors = await buildFaceDatabase();
+            }
+
             if (!labeledFaceDescriptors || labeledFaceDescriptors.length === 0) {
                  if (!loadingText.textContent.startsWith('Error')) loadingText.textContent = 'Error: មិនអាចបង្កើតមូលដ្ឋានទិន្នន័យផ្ទៃមុខបានទេ។';
                  return;
             }
+            
             progressBar.style.width = '100%';
             loadingText.textContent = 'ប្រព័ន្ធរួចរាល់។';
             setTimeout(() => {
@@ -508,7 +802,7 @@
             initAudio();
             if (fileInput.files.length === 0) return;
             if (!labeledFaceDescriptors || labeledFaceDescriptors.length === 0) {
-                logToAIAssistant('មូលដ្ឋានទិន្នន័យមិនទាន់រួចរាល់ទេ។ សូមពិនិត្យ API Key។', 'warn');
+                logToAIAssistant('មូលដ្ឋានទិន្នន័យមិនទាន់រួចរាល់ទេ។ សូមពិនិត្យ API Key។', 'critical');
                 return;
             }
 
@@ -531,7 +825,13 @@
                 const displaySize = { width: imgElement.width, height: imgElement.height };
                 faceapi.matchDimensions(canvas, displaySize);
                 logToAIAssistant('កំពុងស្វែងរកផ្ទៃមុខក្នុងរូបភាព...');
-                const detections = await faceapi.detectAllFaces(imgElement, new faceapi.SsdMobilenetv1Options()).withFaceLandmarks().withFaceDescriptors().withAgeAndGender();
+                // ដំណើរការម៉ូឌែលទាំងអស់
+                const detections = await faceapi.detectAllFaces(imgElement, new faceapi.SsdMobilenetv1Options())
+                    .withFaceLandmarks()
+                    .withFaceDescriptors()
+                    .withAgeAndGender()
+                    .withFaceExpressions();
+                
                 const resizedDetections = faceapi.resizeResults(detections, displaySize);
 
                 if (resizedDetections.length === 0) {
@@ -566,7 +866,8 @@
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 interactiveDetections.forEach((detection, index) => {
-                    const boxColor = index === hoveredFaceIndex ? '#34d399' : '#ffffff';
+                    /* NEW: Brighter Green */
+                    const boxColor = index === hoveredFaceIndex ? '#4ade80' : '#ffffff';
                     new faceapi.draw.DrawBox(detection.detection.box, { boxColor, lineWidth: 2, label: `មុខ #${index+1}`}).draw(canvas);
                 });
             }
@@ -651,6 +952,12 @@
             const noseTip = landmarks.getNose()[3];
             const isProfile = Math.abs(noseTip.x - (jawline[0].x + faceWidth/2)) > faceWidth * 0.2;
 
+            // គូស Landmarks ភ្លាមៗដើម្បី "Lock Target"
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            /* NEW: Brighter Green */
+            new faceapi.draw.DrawFaceLandmarks(landmarks, { drawLines: true, color: '#4ade80', lineWidth: 1 }).draw(canvas);
+
             if (isProfile) {
                 analysisMode = 'Profile Reconstruction';
                 logToAIAssistant('រកឃើញផ្ទៃមុខបែរចំហៀង។ កំពុងព្យាយាមបង្កើតទម្រង់មុខឡើងវិញ...', 'warn');
@@ -659,9 +966,20 @@
                 analysisMode = 'Deep Scan';
                 logToAIAssistant('គុណភាពរូបភាពល្អ។ កំពុងដំណើរការ Deep Scan...');
                 const enhancedFaceCanvas = await enhanceImage(imgElement, detection.detection.box);
-                const deepScanDetection = await faceapi.detectSingleFace(enhancedFaceCanvas).withFaceLandmarks().withFaceDescriptor();
+                
+                // ដំណើរការម៉ូឌែលទាំងអស់លើរូបភាពដែលបានកែលម្អ
+                const deepScanDetection = await faceapi.detectSingleFace(enhancedFaceCanvas)
+                    .withFaceLandmarks()
+                    .withFaceDescriptor()
+                    .withAgeAndGender()
+                    .withFaceExpressions(); // ត្រូវប្រាកដថាបានដំណើរការ
+                    
                 if (deepScanDetection) {
                     finalDescriptor = deepScanDetection.descriptor;
+                    // អាប់ដេតទិន្នន័យ detection ជាមួយនឹងលទ្ធផល Deep Scan
+                    detection.age = deepScanDetection.age;
+                    detection.gender = deepScanDetection.gender;
+                    detection.expressions = deepScanDetection.expressions;
                 } else {
                     logToAIAssistant('Deep Scan បរាជ័យ, ត្រឡប់មកប្រើ Standard Scan', 'warn');
                     analysisMode = 'Fast Scan';
@@ -692,136 +1010,256 @@
                  await new Promise(res => setTimeout(res, 500));
             }
             
-            const ctx = canvas.getContext('2d');
+            // គូសលទ្ធផលចុងក្រោយ
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            const matcherThreshold = isProfile ? 0.6 : 0.5;
+            const matcherThreshold = isProfile ? 0.6 : 0.5; // កំណត់ពិន្ទុសម្រាប់ទទួលស្គាល់
             const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, matcherThreshold);
             const bestMatch = faceMatcher.findBestMatch(finalDescriptor);
             const label = bestMatch.label === 'unknown' ? 'មិនស្គាល់' : JSON.parse(bestMatch.label).name;
 
             new faceapi.draw.DrawBox(box, { label }).draw(canvas);
-            new faceapi.draw.DrawFaceLandmarks(landmarks, { drawLines: true, color: '#34d399' }).draw(canvas);
-
+            
+            // ប្រមូលលទ្ធផលដែលផ្គូផ្គងទាំងអស់
             const allMatches = labeledFaceDescriptors.map(ld => {
                 const distance = faceapi.euclideanDistance(finalDescriptor, ld.descriptors[0]);
                 return { distance, labelData: JSON.parse(ld.label) };
             }).sort((a, b) => a.distance - b.distance);
             
-            await displayFaceResults(allMatches.slice(0, 4), analysisMode);
-        }
-
-        async function animateVerification(card) {
-            const verificationContainer = card.querySelector('.verification-details');
-            if (!verificationContainer) return;
-            await new Promise(res => setTimeout(res, 400));
-            verificationContainer.classList.remove('hidden');
-
-            const features = verificationContainer.querySelectorAll('ul li');
-            const featureNames = {
-                structure: 'ទម្រង់មុខ',
-                eyes: 'ទីតាំងភ្នែក',
-                symmetry: 'ស៊ីមេទ្រីផ្ទៃមុខ',
-                goldenRatio: 'សមាមាត្រមាស',
-                texture: 'វាយនភាពស្បែក'
-            };
-
-            for (const feature of features) {
-                await new Promise(res => setTimeout(res, 250));
-                const featureKey = feature.dataset.feature;
-                feature.querySelector('span').innerHTML = `
-                    <span class="text-emerald-400 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                        ${featureNames[featureKey]}: <span class="ml-2 font-bold text-white">ផ្ទៀងផ្ទាត់រួចរាល់</span>
-                    </span>
-                `;
-                playSound('scan');
-            }
+            // បង្ហាញលទ្ធផល (បញ្ជូន `detection` ទៅជាមួយ)
+            await displayFaceResults(allMatches.slice(0, 4), analysisMode, detection);
         }
         
-        async function displayFaceResults(matches, analysisMode) {
+        async function displayFaceResults(matches, analysisMode, targetDetection) {
             logToAIAssistant('ការវិភាគបានបញ្ចប់។ កំពុងបង្ហាញលទ្ធផល...');
             resultsDiv.innerHTML = ''; 
-            const faceResultContainer = document.createElement('div');
-            faceResultContainer.className = 'p-1';
-            resultsDiv.appendChild(faceResultContainer);
+
+            // --- NEW: Create Dashboard Layout ---
+            const layout = document.createElement('div');
+            layout.id = 'results-layout';
+            layout.className = 'flex flex-col md:flex-row gap-4';
+            
+            const bestMatchPanel = document.createElement('div');
+            bestMatchPanel.id = 'best-match-panel';
+            bestMatchPanel.className = 'flex-1 md:flex-2 overflow-y-auto pr-2 custom-scrollbar'; // flex-2
+
+            const otherMatchesPanel = document.createElement('div');
+            otherMatchesPanel.id = 'other-matches-panel';
+            /* NEW: Brighter Green */
+            otherMatchesPanel.className = 'flex-1 overflow-y-auto md:border-l md:border-green-400/30 md:pl-4 custom-scrollbar';
+            otherMatchesPanel.innerHTML = '<h3 class="text-sm font-semibold text-gray-400 mb-2 font-khmer">លទ្ធផលផ្គូផ្គងផ្សេងទៀត</h3>';
+
+            layout.appendChild(bestMatchPanel);
+            layout.appendChild(otherMatchesPanel);
+            resultsDiv.appendChild(layout);
+
+
+            // --- ត្រៀមទិន្នន័យវិភាគ Biometric ---
+            let biometricHtml = '';
+            if (targetDetection) {
+                const age = Math.round(targetDetection.age);
+                const gender = targetDetection.gender === 'male' ? 'បុរស' : 'ស្ត្រី';
+                
+                // ស្វែងរកអារម្មណ៍ដែលមានពិន្ទុខ្ពស់สุด
+                const topExpression = Object.entries(targetDetection.expressions).sort((a, b) => b[1] - a[1])[0];
+                const expressionName = expressionMap[topExpression[0]] || topExpression[0];
+                const expressionConf = (topExpression[1] * 100).toFixed(1);
+
+                biometricHtml = `
+                    <!-- NEW: Brighter Green -->
+                    <h4 class="text-sm font-bold text-green-300 mb-2 mt-3 pt-3 border-t border-green-400/30 font-khmer">ទិន្នន័យពីការវិភាគគោលដៅ</h4>
+                    <ul class="text-xs space-y-1">
+                        <li class="data-bio-gender"><span>ភេទ (ប៉ាន់ស្មាន): <span class="font-bold text-white">${gender}</span></span></li>
+                        <li class="data-bio-age"><span>អាយុ (ប៉ាន់ស្មាន): <span class="font-bold text-white">~${age} ឆ្នាំ</span></span></li>
+                        <li class="data-bio-exp"><span>អារម្មណ៍ (ប៉ាន់ស្មាន): <span class="font-bold text-white">${expressionName} (${expressionConf}%)</span></span></li>
+                    </ul>
+                `;
+            }
+            // ---------------------------------
 
             for (const [index, match] of matches.entries()) {
                 const { distance, labelData } = match;
-                const confidence = Math.max(0, (1 - distance) * 100).toFixed(2);
-                
-                let cardClasses = 'bg-black/50 p-3 rounded-lg border border-emerald-500/30 flex items-start space-x-4 mb-2 relative overflow-hidden result-card';
-                let nameBlock = '<p class="data-name text-lg font-bold text-white"></p>';
-                let verificationSection = '';
+                const confidence = Math.max(0, (1 - (distance / 0.6)) * 100).toFixed(2); // គណនាទំនុកចិត្ត (0.6 ជា max distance)
                 
                 if (index === 0) {
-                    cardClasses = 'bg-black/50 p-3 rounded-lg border-2 border-emerald-400 flex items-start space-x-4 mb-2 relative overflow-hidden result-card';
-                    nameBlock = `
-                        <div class="flex items-center gap-2">
-                            <p class="data-name text-lg font-bold text-white"></p>
-                            <span class="text-xs bg-emerald-500 text-black font-bold py-0.5 px-1.5 rounded font-khmer">ផ្គូផ្គងល្អបំផុត</span>
+                    // --- RENDER BEST MATCH ---
+                    let nameBlock = '';
+                    let cardBorderClass = ''; // This will be used for the *label* not the border
+
+                    if (confidence > 40) { // ពិនិត្យថាជា Best Match និងមានទំនុកចិត្តសមរម្យ
+                        nameBlock = `
+                            <div class="flex items-center gap-2">
+                                <p class="data-name text-lg font-bold text-white"></p>
+                                <!-- NEW: Brighter Green -->
+                                <span class="text-xs bg-green-400 text-black font-bold py-0.5 px-1.5 rounded font-khmer">ផ្គូផ្គងល្អបំផុត</span>
+                            </div>
+                        `;
+                    } else { // បើជា Best Match តែទំនុកចិត្តទាប
+                        nameBlock = `
+                            <div class="flex items-center gap-2">
+                                <p class="data-name text-lg font-bold text-white"></p>
+                                <span class="text-xs bg-yellow-500 text-black font-bold py-0.5 px-1.5 rounded font-khmer">ទំនុកចិត្តទាប</span>
+                            </div>
+                        `;
+                    }
+                    
+                    const confidenceAngle = (confidence / 100) * 360;
+                    
+                    // NEW: Create the animated wrapper
+                    const resultCardWrapper = document.createElement('div');
+                    resultCardWrapper.className = `result-card animated-hacker-border`; // Pop-in animation is on this wrapper
+
+                    // NEW: Create the inner content card
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'hacker-card-content';
+
+                    const cardContent = `
+                        <!-- NEW: Hacker Corners -->
+                        <div class="hacker-corner hacker-corner-tl"></div>
+                        <div class="hacker-corner hacker-corner-tr"></div>
+                        <div class="hacker-corner hacker-corner-bl"></div>
+                        <div class="hacker-corner hacker-corner-br"></div>
+
+                        <div class="flex items-center gap-2 mb-3">
+                            ${nameBlock}
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="col-span-1 flex flex-col items-center">
+                                <!-- NEW: Brighter Green -->
+                                <img src="${labelData.imageUrl}" class="w-full h-auto object-cover rounded-md border-2 border-green-500" alt="Matched Photo" onerror="this.src='https://placehold.co/150x200/000000/4ade80?text=Error'">
+                                <div class="relative w-full flex justify-center mt-5 mb-4">
+                                    <div class="confidence-gauge" style="--confidence-angle: 0deg;">
+                                        <div class="confidence-gauge-text">0%</div>
+                                        <div class="confidence-gauge-label font-khmer">ទំនុកចិត្ត</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-1 md:col-span-2">
+                                <!-- NEW: Brighter Green -->
+                                <h4 class="text-sm font-bold text-green-300 mb-2 font-khmer">ព័ត៌មានពីមូលដ្ឋានទិន្នន័យ</h4>
+                                <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-sm mb-2">
+                                    <span class="text-gray-400 font-khmer">អត្តលេខ:</span>
+                                    <span class="data-id text-white"></span>
+                                    <span class="text-gray-400 font-khmer">ឈ្មោះខ្មែរ:</span>
+                                    <span class="data-name-km text-white"></span>
+                                    <span class="text-gray-400 font-khmer">ភេទ:</span>
+                                    <span class="data-gender text-white"></span>
+                                    <span class="text-gray-400 font-khmer">ក្រុម:</span>
+                                    <span class="data-group text-white"></span>
+                                    <span class="text-gray-400 font-khmer">ថ្នាក់:</span>
+                                    <span class="data-class text-white"></span>
+                                    <span class="text-gray-400 font-khmer">ផ្នែក:</span>
+                                    <span class="data-department text-white"></span>
+                                </div>
+                                <p class="data-distance text-xs text-gray-500 mt-2"></p>
+                                <p class="text-xs text-cyan-400 mt-1">របៀបវិភាគ: ${analysisMode}</p>
+                                
+                                ${biometricHtml} <!-- បញ្ចូលទិន្នន័យ Biometric នៅទីនេះ -->
+                            </div>
                         </div>
                     `;
-                    verificationSection = `
-                        <div class="verification-details mt-3 pt-3 border-t border-emerald-500/30 hidden">
-                            <h4 class="text-sm font-bold text-emerald-300 mb-2 font-khmer">ការវិភាគ Biometric កម្រិតខ្ពស់</h4>
-                            <ul class="text-xs space-y-1">
-                                <li data-feature="structure"><span>កំពុងវិភាគ ទម្រង់មុខ...</span></li>
-                                <li data-feature="eyes"><span>កំពុងវិភាគ ទីតាំងភ្នែក...</span></li>
-                                <li data-feature="symmetry"><span>កំពុងវិភាគ ស៊ីមេទ្រីផ្ទៃមុខ...</span></li>
-                                <li data-feature="goldenRatio"><span>កំពុងវិភាគ សមាមាត្រមាស...</span></li>
-                                <li data-feature="texture"><span>កំពុងវិភាគ វាយនភាពស្បែក...</span></li>
-                            </ul>
+                    resultCard.innerHTML = cardContent;
+                    resultCardWrapper.appendChild(resultCard); // Add inner card to wrapper
+                    bestMatchPanel.appendChild(resultCardWrapper); // Add wrapper to panel
+                    playSound('beep');
+
+                    // Animate Gauge
+                    setTimeout(() => {
+                        const gauge = resultCardWrapper.querySelector('.confidence-gauge');
+                        const gaugeText = resultCardWrapper.querySelector('.confidence-gauge-text');
+                        if (gauge) gauge.style.setProperty('--confidence-angle', `${confidenceAngle}deg`);
+                        // Animate text ពី 0 ទៅ confidence
+                        let start = 0;
+                        const end = parseFloat(confidence);
+                        const duration = 1000;
+                        const stepTime = 50;
+                        const steps = duration / stepTime;
+                        const increment = end / steps;
+                        
+                        const timer = setInterval(() => {
+                            start += increment;
+                            if (start >= end) {
+                                start = end;
+                                clearInterval(timer);
+                            }
+                            if (gaugeText) gaugeText.textContent = `${start.toFixed(1)}%`;
+                        }, stepTime);
+
+                    }, 400); // Wait for card pop-in
+
+                    // ប្រើ TypeWriter សម្រាប់ទិន្នន័យ
+                    typeWriter(resultCardWrapper.querySelector('.data-name'), labelData.name);
+                    await new Promise(res => setTimeout(res, 100));
+                    
+                    // Populate the grid
+                    typeWriter(resultCardWrapper.querySelector('.data-id'), labelData.id || 'N/A');
+                    await new Promise(res => setTimeout(res, 100));
+                    typeWriter(resultCardWrapper.querySelector('.data-name-km'), labelData.nameKm || 'N/A');
+                    await new Promise(res => setTimeout(res, 100));
+                    typeWriter(resultCardWrapper.querySelector('.data-gender'), labelData.gender || 'N/A');
+                    await new Promise(res => setTimeout(res, 100));
+                    typeWriter(resultCardWrapper.querySelector('.data-group'), labelData.group || 'N/A');
+                    await new Promise(res => setTimeout(res, 100));
+                    typeWriter(resultCardWrapper.querySelector('.data-class'), labelData.class || 'N/A');
+                    await new Promise(res => setTimeout(res, 100));
+                    typeWriter(resultCardWrapper.querySelector('.data-department'), labelData.department || 'N/A');
+                    
+                    // Populate the fields below the grid
+                    await new Promise(res => setTimeout(res, 100));
+                    typeWriter(resultCardWrapper.querySelector('.data-distance'), `ពិន្ទុគម្លាត: ${distance.toFixed(4)}`);
+
+                    // ធ្វើ TypeWriter សម្រាប់ទិន្នន័យ Biometric
+                    if (biometricHtml) {
+                        await new Promise(res => setTimeout(res, 100));
+                        const bioGender = resultCardWrapper.querySelector('.data-bio-gender span');
+                        if(bioGender) typeWriter(bioGender, bioGender.innerHTML);
+                        
+                        await new Promise(res => setTimeout(res, 100));
+                        const bioAge = resultCardWrapper.querySelector('.data-bio-age span');
+                        if(bioAge) typeWriter(bioAge, bioAge.innerHTML);
+
+                        await new Promise(res => setTimeout(res, 100));
+                        const bioExp = resultCardWrapper.querySelector('.data-bio-exp span');
+                        if(bioExp) typeWriter(bioExp, bioExp.innerHTML);
+
+                        // លេងសំឡេង "Confirm" បន្ទាប់ពីទិន្នន័យទាំងអស់បង្ហាញ
+                        await new Promise(res => setTimeout(res, 200));
+                        playSound('confirm');
+                    }
+
+                } else {
+                    // --- RENDER OTHER MATCHES ---
+                    const otherCard = document.createElement('div');
+                    otherCard.className = 'other-match-card';
+                    otherCard.style.animationDelay = `${index * 0.15}s`;
+                    
+                    otherCard.innerHTML = `
+                        <!-- NEW: Brighter Green -->
+                        <img src="${labelData.imageUrl}" class="w-12 h-14 object-cover rounded border border-green-600" onerror="this.src='https://placehold.co/48x56/000000/4ade80?text=N/A'">
+                        <div class="flex-grow overflow-hidden">
+                            <p class="text-sm font-bold text-white truncate">${labelData.name}</p>
+                            <p class="text-xs text-gray-400 truncate">${labelData.department || 'N/A'}</p>
+                            <div class="confidence-bar-bg mt-1">
+                                <!-- NEW: Brighter Green -->
+                                <div class="confidence-bar" style="width: 0%; background-color: ${confidence > 50 ? '#4ade80' : '#facc15'}"></div>
+                            </div>
+                            <!-- NEW: Brighter Green -->
+                            <p class="text-xs ${confidence > 50 ? 'text-green-400' : 'text-yellow-400'}">ទំនុកចិត្ត: ${confidence}%</p>
                         </div>
                     `;
+                    otherMatchesPanel.appendChild(otherCard);
+                    playSound('scan');
+
+                    // Animate confidence bar
+                    setTimeout(() => {
+                        const bar = otherCard.querySelector('.confidence-bar');
+                        if (bar) bar.style.width = `${confidence}%`;
+                    }, 500 + index * 150); // Stagger animation
                 }
-                
-                const resultCard = document.createElement('div');
-                resultCard.className = cardClasses;
-                
-                 const analysisModeText = `<p class="text-xs text-cyan-400 mt-1">របៀបវិភាគ: ${analysisMode}</p>`;
-
-                const cardContent = `
-                    <div class="relative w-20 h-24 flex-shrink-0">
-                        <img src="${labelData.imageUrl}" class="w-full h-full object-cover rounded-md border-2 border-emerald-600" alt="Matched Photo" onerror="this.src='https://placehold.co/80x96/000000/34d399?text=Error'">
-                    </div>
-                    <div class="flex-grow">
-                        ${nameBlock}
-                        <p class="data-name-km text-md text-gray-300"></p>
-                        <p class="data-id text-sm text-gray-400"></p>
-                        <p class="data-gender text-sm text-gray-400"></p>
-                        <p class="data-distance text-sm text-gray-400"></p>
-                        <div class="mt-2">
-                            <span class="data-confidence font-semibold ${confidence > 50 ? 'text-emerald-400' : 'text-yellow-400'}"></span>
-                        </div>
-                        ${analysisModeText}
-                        ${verificationSection}
-                    </div>
-                `;
-                resultCard.innerHTML = cardContent;
-                faceResultContainer.appendChild(resultCard);
-                playSound(index === 0 ? 'beep' : 'scan');
-
-                typeWriter(resultCard.querySelector('.data-name'), labelData.name);
-                await new Promise(res => setTimeout(res, 100));
-                typeWriter(resultCard.querySelector('.data-name-km'), labelData.nameKm);
-                await new Promise(res => setTimeout(res, 100));
-                typeWriter(resultCard.querySelector('.data-id'), `អត្តលេខ: ${labelData.id}`);
-                await new Promise(res => setTimeout(res, 100));
-                typeWriter(resultCard.querySelector('.data-gender'), `ភេទ: ${labelData.gender}`);
-                await new Promise(res => setTimeout(res, 100));
-                typeWriter(resultCard.querySelector('.data-distance'), `ពិន្ទុគម្លាត: ${distance.toFixed(4)}`);
-                await new Promise(res => setTimeout(res, 100));
-                typeWriter(resultCard.querySelector('.data-confidence'), `ទំនុកចិត្ត: ${confidence}%`);
-
-                if (index === 0) {
-                    await animateVerification(resultCard);
-                }
-
-                await new Promise(res => setTimeout(res, 400));
             }
         }
         initialize();
     </script>
 </body>
 </html>
+
